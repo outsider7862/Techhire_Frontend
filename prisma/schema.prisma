@@ -1,0 +1,106 @@
+// TechHire Copilot — data model
+//
+// Next.js owns this schema and all persistence via Prisma. The FastAPI
+// service never touches the database directly — it receives a resume +
+// role requirements and returns structured JSON; Next.js is what writes
+// that result here. See backend/app/schemas.py for the matching contract.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // Pooled connection (via Supabase's PgBouncer, port 6543) for normal
+  // runtime queries — required because Vercel's serverless functions
+  // spin up per request and would exhaust Postgres's connection limit
+  // without pooling. Append ?pgbouncer=true to this URL.
+  url       = env("DATABASE_URL")
+  // Direct connection (port 5432), used only for migrations — PgBouncer's
+  // transaction mode doesn't support the prepared statements Prisma
+  // Migrate needs.
+  directUrl = env("DIRECT_URL")
+}
+
+enum CandidateStatus {
+  PENDING // uploaded, not yet processed by the AI service
+  SCORED // parsed and scored successfully
+  FAILED // parsing or scoring failed for this specific resume
+}
+
+enum PipelineStage {
+  APPLIED
+  SCREENING
+  INTERVIEW
+  OFFER
+  REJECTED
+  HIRED
+}
+
+model Role {
+  id                 String      @id @default(cuid())
+  title              String
+  description        String      @default("")
+  requiredSkills     String[]
+  minYearsExperience Int         @default(0)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  candidates         Candidate[]
+  batches            Batch[]
+}
+
+model Candidate {
+  id      String @id @default(cuid())
+  roleId  String
+  role    Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  batchId String?
+  batch   Batch?  @relation(fields: [batchId], references: [id], onDelete: SetNull)
+
+  fileName String
+  fileUrl  String // Supabase Storage path, not the raw file itself
+
+  status       CandidateStatus @default(PENDING)
+  errorMessage String?
+
+  // --- Populated once the AI service returns a result ---
+  skills          String[]
+  techStack       String[]
+  yearsExperience Float?
+  summary         String?
+  score           Int? // 0-100
+  scoreReasoning  String?
+
+  stage PipelineStage @default(APPLIED)
+  notes Note[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([roleId])
+  @@index([batchId])
+  @@index([status])
+}
+
+model Note {
+  id          String    @id @default(cuid())
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  body        String
+  createdAt   DateTime  @default(now())
+}
+
+// Tracks a single bulk-upload run (e.g. "100 resumes for the Backend role
+// uploaded on Aug 12") so the frontend can poll /api/batches/{id} for
+// progress instead of guessing from the candidate list.
+model Batch {
+  id         String      @id @default(cuid())
+  roleId     String
+  role       Role        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  total      Int
+  completed  Int         @default(0)
+  failed     Int         @default(0)
+  status     String      @default("processing") // processing | complete
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  candidates Candidate[]
+}
