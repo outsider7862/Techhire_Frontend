@@ -10,16 +10,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  // Pooled connection (via Supabase's PgBouncer, port 6543) for normal
-  // runtime queries — required because Vercel's serverless functions
-  // spin up per request and would exhaust Postgres's connection limit
-  // without pooling. Append ?pgbouncer=true to this URL.
-  url       = env("DATABASE_URL")
-  // Direct connection (port 5432), used only for migrations — PgBouncer's
-  // transaction mode doesn't support the prepared statements Prisma
-  // Migrate needs.
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
 
 enum CandidateStatus {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { verifyParsingServiceToken } from "@/lib/auth";
 
 /**
  * POST /api/batches/:batchId/complete
@@ -9,9 +10,11 @@ import { prisma } from "@/lib/prisma";
  * bar to a "done" state without one extra poll's delay.
  */
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ batchId: string }> }
 ) {
+  const authError = verifyParsingServiceToken(req);
+  if (authError) return authError;
   const { batchId } = await params;
 
   await prisma.batch.update({

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { verifyParsingServiceToken } from "@/lib/auth";
 
 /**
  * POST /api/webhooks/candidate-result
@@ -12,6 +13,9 @@ import { prisma } from "@/lib/prisma";
  * handled here rather than treated as an error — see status: "failed".
  */
 export async function POST(req: NextRequest) {
+  const authError = verifyParsingServiceToken(req);
+  if (authError) return authError;
+
   const body = await req.json();
   const { candidate_id, status, parsed, score, error } = body;
 

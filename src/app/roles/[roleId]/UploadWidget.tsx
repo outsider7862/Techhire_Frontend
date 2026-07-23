@@ -63,7 +63,11 @@ export default function UploadWidget({ roleId }: { roleId: string }) {
       // 3. All bytes are safely in storage now — tell Next.js to kick
       // off FastAPI processing.
       setStage("processing");
-      await fetch(`/api/batches/${batchId}`, { method: "POST" });
+      const startRes = await fetch(`/api/batches/${batchId}`, { method: "POST" });
+      if (!startRes.ok) {
+        const body = await startRes.json().catch(() => ({}));
+        throw new Error(body.error ?? "Failed to start processing");
+      }
 
       // 4. Poll for progress until every candidate is scored or failed.
       const poll = async () => {
@@ -114,10 +118,9 @@ export default function UploadWidget({ roleId }: { roleId: string }) {
           {stage === "uploading"
             ? "Uploading resumes…"
             : progress
-            ? `Scoring candidates… ${progress.scored + progress.failed}/${
-                progress.total
+              ? `Scoring candidates… ${progress.scored + progress.failed}/${progress.total
               }`
-            : "Starting…"}
+              : "Starting…"}
         </div>
       )}
 
