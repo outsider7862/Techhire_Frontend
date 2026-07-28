@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
       where: { id: candidate_id },
       data: {
         status: "SCORED",
+        name: parsed.name,
         skills: parsed.skills,
         techStack: parsed.tech_stack,
         yearsExperience: parsed.years_experience,

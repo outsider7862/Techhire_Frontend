@@ -54,6 +54,7 @@ model Candidate {
   errorMessage String?
 
   // --- Populated once the AI service returns a result ---
+  name            String?
   skills          String[]
   techStack       String[]
   yearsExperience Float?
@@ -61,8 +62,9 @@ model Candidate {
   score           Int? // 0-100
   scoreReasoning  String?
 
-  stage PipelineStage @default(APPLIED)
-  notes Note[]
+  stage  PipelineStage @default(APPLIED)
+  notes  Note[]
+  events Event[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -78,6 +80,24 @@ model Note {
   candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
   body        String
   createdAt   DateTime  @default(now())
+}
+
+// A scheduled interview or other event tied to a candidate. This is a
+// self-contained internal calendar — no Google/Outlook OAuth, no
+// candidate-facing booking flow. "Smart" here means honest conflict
+// detection (see POST /api/events), not a full scheduling optimizer.
+model Event {
+  id          String    @id @default(cuid())
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  title       String
+  startTime   DateTime
+  endTime     DateTime
+  notes       String?
+  createdAt   DateTime  @default(now())
+
+  @@index([candidateId])
+  @@index([startTime])
 }
 
 // Tracks a single bulk-upload run (e.g. "100 resumes for the Backend role

@@ -30,22 +30,27 @@ export default function EditRolePage() {
         e.preventDefault();
         setSubmitting(true);
 
-        await fetch(`/api/roles/${params.roleId}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                title,
-                description,
-                requiredSkills: skills
-                    .split(",")
-                    .map((s) => s.trim())
-                    .filter(Boolean),
-                minYearsExperience: minYears,
-            }),
-        });
-
-        router.push(`/roles/${params.roleId}`);
-        router.refresh();
+        try {
+            const res = await fetch(`/api/roles/${params.roleId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title,
+                    description,
+                    requiredSkills: skills
+                        .split(",")
+                        .map((s) => s.trim())
+                        .filter(Boolean),
+                    minYearsExperience: minYears,
+                }),
+            });
+            if (!res.ok) throw new Error("Failed to save role");
+            router.push(`/roles/${params.roleId}`);
+            router.refresh();
+        } catch {
+            alert("Couldn't save changes — please try again.");
+            setSubmitting(false);
+        }
     }
 
     async function handleDelete() {

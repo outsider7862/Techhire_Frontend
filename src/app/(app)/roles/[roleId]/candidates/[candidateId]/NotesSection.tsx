@@ -21,17 +21,23 @@ export default function NotesSection({
         if (!draft.trim()) return;
         setSubmitting(true);
 
-        const res = await fetch(`/api/candidates/${candidateId}/notes`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ body: draft }),
-        });
-        const note = await res.json();
+        try {
+            const res = await fetch(`/api/candidates/${candidateId}/notes`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ body: draft }),
+            });
+            if (!res.ok) throw new Error("Failed to add note");
+            const note = await res.json();
 
-        setNotes([note, ...notes]);
-        setDraft("");
-        setSubmitting(false);
-        router.refresh();
+            setNotes([note, ...notes]);
+            setDraft("");
+            router.refresh();
+        } catch {
+            alert("Couldn't add the note — please try again.");
+        } finally {
+            setSubmitting(false);
+        }
     }
 
     return (

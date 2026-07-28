@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const NAV_ITEMS = [{ href: "/roles", label: "Roles" }];
+const NAV_ITEMS = [
+    { href: "/roles", label: "Roles" },
+    { href: "/candidates", label: "Candidates" },
+    { href: "/calendar", label: "Calendar" },
+];
 
 export default function Sidebar() {
     const pathname = usePathname();
@@ -25,8 +29,8 @@ export default function Sidebar() {
                             key={item.href}
                             href={item.href}
                             className={`block rounded-md px-3 py-2 text-sm font-medium transition-colors ${active
-                                    ? "bg-primary/10 text-primary"
-                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                ? "bg-primary/10 text-primary"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                 }`}
                         >
                             {item.label}

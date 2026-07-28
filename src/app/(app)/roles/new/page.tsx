@@ -16,22 +16,27 @@ export default function NewRolePage() {
     e.preventDefault();
     setSubmitting(true);
 
-    const res = await fetch("/api/roles", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title,
-        description,
-        requiredSkills: skills
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean),
-        minYearsExperience: minYears,
-      }),
-    });
-
-    const role = await res.json();
-    router.push(`/roles/${role.id}`);
+    try {
+      const res = await fetch("/api/roles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          description,
+          requiredSkills: skills
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+          minYearsExperience: minYears,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to create role");
+      const role = await res.json();
+      router.push(`/roles/${role.id}`);
+    } catch {
+      alert("Couldn't create the role — please try again.");
+      setSubmitting(false);
+    }
   }
 
   return (

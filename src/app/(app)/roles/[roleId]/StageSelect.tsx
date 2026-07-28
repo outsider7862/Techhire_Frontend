@@ -24,15 +24,24 @@ export default function StageSelect({
   const [saving, setSaving] = useState(false);
 
   async function handleChange(newStage: string) {
+    const previousStage = stage;
     setStage(newStage);
     setSaving(true);
-    await fetch(`/api/candidates/${candidateId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stage: newStage }),
-    });
-    setSaving(false);
-    router.refresh();
+
+    try {
+      const res = await fetch(`/api/candidates/${candidateId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stage: newStage }),
+      });
+      if (!res.ok) throw new Error("Failed to update stage");
+      router.refresh();
+    } catch {
+      setStage(previousStage);
+      alert("Couldn't update the stage — please try again.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
