@@ -1,6 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ candidateId: string }> }
+) {
+  const { candidateId } = await params;
+
+  const candidate = await prisma.candidate.findUnique({
+    where: { id: candidateId },
+    include: {
+      role: true,
+      notes: { orderBy: { createdAt: "desc" } },
+    },
+  });
+
+  if (!candidate) {
+    return NextResponse.json({ error: "Candidate not found" }, { status: 404 });
+  }
+
+  return NextResponse.json(candidate);
+}
+
 /**
  * PATCH /api/candidates/:candidateId
  * Body: { stage: "APPLIED" | "SCREENING" | "INTERVIEW" | "OFFER" | "REJECTED" | "HIRED" }

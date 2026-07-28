@@ -40,7 +40,7 @@ export default function StageSelect({
       value={stage}
       disabled={saving}
       onChange={(e) => handleChange(e.target.value)}
-      className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs disabled:opacity-50"
+      className="rounded-md border border-border bg-card px-2.5 py-1.5 text-xs text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
     >
       {STAGES.map((s) => (
         <option key={s} value={s}>

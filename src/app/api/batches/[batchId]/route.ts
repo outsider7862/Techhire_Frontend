@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSignedReadUrl } from "@/lib/storage";
 import { startBatch } from "@/lib/parsingService";
+import { resolveIfStale } from "@/lib/staleBatches";
 
 /**
  * GET /api/batches/:batchId
@@ -14,6 +15,8 @@ export async function GET(
   { params }: { params: Promise<{ batchId: string }> }
 ) {
   const { batchId } = await params;
+
+  await resolveIfStale(batchId);
 
   const batch = await prisma.batch.findUnique({
     where: { id: batchId },

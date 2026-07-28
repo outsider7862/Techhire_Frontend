@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function NewRolePage() {
   const router = useRouter();
@@ -35,10 +36,13 @@ export default function NewRolePage() {
 
   return (
     <main className="mx-auto max-w-xl px-6 py-16">
-      <h1 className="text-xl font-semibold text-slate-900">New role</h1>
+      <Breadcrumbs
+        items={[{ label: "Roles", href: "/roles" }, { label: "New role" }]}
+      />
+      <h1 className="text-xl font-semibold text-foreground">New role</h1>
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <div>
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-foreground">
             Title
           </label>
           <input
@@ -46,33 +50,33 @@ export default function NewRolePage() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Backend Engineer"
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-foreground">
             Description
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-foreground">
             Required skills (comma separated)
           </label>
           <input
             value={skills}
             onChange={(e) => setSkills(e.target.value)}
             placeholder="Python, PostgreSQL, FastAPI"
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-foreground">
             Minimum years of experience
           </label>
           <input
@@ -80,13 +84,13 @@ export default function NewRolePage() {
             min={0}
             value={minYears}
             onChange={(e) => setMinYears(Number(e.target.value))}
-            className="mt-1 w-32 rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-32 rounded-md border border-border px-3 py-2 text-sm"
           />
         </div>
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
           {submitting ? "Creating…" : "Create role"}
         </button>

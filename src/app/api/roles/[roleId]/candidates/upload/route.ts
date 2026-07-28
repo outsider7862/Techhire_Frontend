@@ -22,8 +22,33 @@ export async function POST(
   const body = await req.json();
   const files: { fileName: string }[] = body.files ?? [];
 
+  const ALLOWED_EXTENSIONS = [".pdf", ".docx"];
+  const MAX_BATCH_SIZE = 150; // keep in sync with backend's MAX_BATCH_SIZE
+
   if (files.length === 0) {
     return NextResponse.json({ error: "No files provided" }, { status: 400 });
+  }
+
+  if (files.length > MAX_BATCH_SIZE) {
+    return NextResponse.json(
+      { error: `Batch of ${files.length} exceeds the ${MAX_BATCH_SIZE}-file limit` },
+      { status: 400 }
+    );
+  }
+
+  const invalidFiles = files.filter((f) => {
+    const ext = f.fileName.slice(f.fileName.lastIndexOf(".")).toLowerCase();
+    return !ALLOWED_EXTENSIONS.includes(ext);
+  });
+  if (invalidFiles.length > 0) {
+    return NextResponse.json(
+      {
+        error: `Unsupported file type(s): ${invalidFiles
+          .map((f) => f.fileName)
+          .join(", ")}`,
+      },
+      { status: 400 }
+    );
   }
 
   const role = await prisma.role.findUnique({ where: { id: roleId } });

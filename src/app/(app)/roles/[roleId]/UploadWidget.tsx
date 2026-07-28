@@ -15,7 +15,39 @@ export default function UploadWidget({ roleId }: { roleId: string }) {
   const [progress, setProgress] = useState<Progress>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const ALLOWED_EXTENSIONS = [".pdf", ".docx"];
+  const MAX_FILE_SIZE_MB = 10;
+  const MAX_BATCH_SIZE = 150; // keep in sync with backend's MAX_BATCH_SIZE
+
   async function handleFiles(files: FileList) {
+    const fileArray = Array.from(files);
+
+    const invalid = fileArray.filter((f) => {
+      const ext = f.name.slice(f.name.lastIndexOf(".")).toLowerCase();
+      return (
+        !ALLOWED_EXTENSIONS.includes(ext) ||
+        f.size > MAX_FILE_SIZE_MB * 1024 * 1024
+      );
+    });
+
+    if (invalid.length > 0) {
+      setStage("error");
+      setErrorMsg(
+        `${invalid.length} file(s) rejected — only PDF/DOCX under ${MAX_FILE_SIZE_MB}MB allowed: ${invalid
+          .map((f) => f.name)
+          .join(", ")}`
+      );
+      return;
+    }
+
+    if (fileArray.length > MAX_BATCH_SIZE) {
+      setStage("error");
+      setErrorMsg(
+        `Batch of ${fileArray.length} exceeds the ${MAX_BATCH_SIZE}-file limit.`
+      );
+      return;
+    }
+
     setStage("uploading");
     setErrorMsg(null);
 
@@ -28,7 +60,7 @@ export default function UploadWidget({ roleId }: { roleId: string }) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            files: Array.from(files).map((f) => ({ fileName: f.name })),
+            files: fileArray.map((f) => ({ fileName: f.name })),
           }),
         }
       );
@@ -40,7 +72,7 @@ export default function UploadWidget({ roleId }: { roleId: string }) {
       // parallel batches — this traffic never touches the Next.js
       // server, so Vercel's 4.5MB function payload limit never applies,
       // even at 100 files.
-      const fileList = Array.from(files);
+      const fileList = fileArray;
       const CONCURRENCY = 10;
       let cursor = 0;
 
@@ -94,7 +126,7 @@ export default function UploadWidget({ roleId }: { roleId: string }) {
   }
 
   return (
-    <div className="rounded-lg border border-dashed border-slate-300 p-6">
+    <div className="rounded-lg border border-dashed border-border bg-card p-6">
       <input
         ref={inputRef}
         type="file"
@@ -107,14 +139,14 @@ export default function UploadWidget({ roleId }: { roleId: string }) {
       {stage === "idle" && (
         <button
           onClick={() => inputRef.current?.click()}
-          className="text-sm font-medium text-slate-900 underline underline-offset-2"
+          className="text-sm font-medium text-foreground underline underline-offset-2 transition-colors hover:text-primary"
         >
           Upload resumes (PDF or DOCX, up to 100 at once)
         </button>
       )}
 
       {(stage === "uploading" || stage === "processing") && (
-        <div className="text-sm text-slate-600">
+        <div className="text-sm text-muted-foreground">
           {stage === "uploading"
             ? "Uploading resumes…"
             : progress
@@ -125,7 +157,7 @@ export default function UploadWidget({ roleId }: { roleId: string }) {
       )}
 
       {stage === "done" && progress && (
-        <div className="text-sm text-slate-600">
+        <div className="text-sm text-muted-foreground">
           Done — {progress.scored} scored
           {progress.failed > 0 ? `, ${progress.failed} failed to parse` : ""}.
           <button
@@ -142,7 +174,7 @@ export default function UploadWidget({ roleId }: { roleId: string }) {
       )}
 
       {stage === "error" && (
-        <div className="text-sm text-red-600">
+        <div className="text-sm text-destructive">
           {errorMsg}
           <button
             onClick={() => setStage("idle")}
