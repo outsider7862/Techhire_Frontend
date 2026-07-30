@@ -12,7 +12,13 @@ const EMAIL_TYPES: { value: EmailType; label: string }[] = [
     { value: "offer", label: "Offer" },
 ];
 
-export default function EmailDraftPanel({ candidateId }: { candidateId: string }) {
+export default function EmailDraftPanel({
+    candidateId,
+    candidateEmail,
+}: {
+    candidateId: string;
+    candidateEmail?: string | null;
+}) {
     const [emailType, setEmailType] = useState<EmailType>("interview_invite");
     const [draft, setDraft] = useState<Draft | null>(null);
     const [instruction, setInstruction] = useState("");
@@ -52,6 +58,13 @@ export default function EmailDraftPanel({ candidateId }: { candidateId: string }
     return (
         <section className="rounded-lg border border-border bg-card p-4">
             <h2 className="text-sm font-medium text-muted-foreground">Draft an email</h2>
+            {candidateEmail ? (
+                <p className="mt-1 text-xs text-muted-foreground">To: {candidateEmail}</p>
+            ) : (
+                <p className="mt-1 text-xs text-muted-foreground">
+                    No email extracted for this candidate — you&apos;ll need to add the recipient yourself.
+                </p>
+            )}
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
                 <select

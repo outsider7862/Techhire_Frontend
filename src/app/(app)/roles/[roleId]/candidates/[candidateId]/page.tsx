@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import NotesSection from "./NotesSection";
 import EmailDraftPanel from "./EmailDraftPanel";
+import ViewResumeButton from "./ViewResumeButton";
 import StageSelect from "../../StageSelect";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getCandidateDisplayName } from "@/lib/displayName";
@@ -45,6 +46,11 @@ export default async function CandidatePage({
                 <div>
                     <h1 className="text-xl font-semibold text-foreground">{displayName}</h1>
                     <p className="mt-0.5 text-xs text-muted-foreground">{candidate.fileName}</p>
+                    {(candidate.email || candidate.phone) && (
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            {[candidate.email, candidate.phone].filter(Boolean).join(" · ")}
+                        </p>
+                    )}
                     <p className="mt-1 text-sm text-muted-foreground">
                         {candidate.status === "SCORED"
                             ? `Score: ${candidate.score}`
@@ -53,7 +59,10 @@ export default async function CandidatePage({
                                 : "Processing…"}
                     </p>
                 </div>
-                <StageSelect candidateId={candidate.id} currentStage={candidate.stage} />
+                <div className="flex items-center gap-2">
+                    <ViewResumeButton candidateId={candidate.id} />
+                    <StageSelect candidateId={candidate.id} currentStage={candidate.stage} />
+                </div>
             </div>
 
             {candidate.status === "FAILED" && (
@@ -128,7 +137,7 @@ export default async function CandidatePage({
             </div>
 
             <div className="mt-10">
-                <EmailDraftPanel candidateId={candidate.id} />
+                <EmailDraftPanel candidateId={candidate.id} candidateEmail={candidate.email} />
             </div>
 
             <div className="mt-10">

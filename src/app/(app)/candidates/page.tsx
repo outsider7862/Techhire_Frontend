@@ -7,11 +7,42 @@ type Candidate = {
     id: string;
     fileName: string;
     name: string | null;
+    email: string | null;
     score: number | null;
     skills: string[];
+    stage: string;
     roleId: string;
     role: { title: string };
 };
+
+function toCsv(rows: Candidate[]): string {
+    const escape = (val: string) => `"${val.replace(/"/g, '""')}"`;
+    const headers = ["Name", "Email", "Role", "Score", "Stage", "Skills"];
+    const lines = [headers.join(",")];
+    for (const c of rows) {
+        lines.push(
+            [
+                escape(getCandidateDisplayName(c)),
+                escape(c.email ?? ""),
+                escape(c.role.title),
+                c.score ?? "",
+                escape(c.stage),
+                escape(c.skills.join("; ")),
+            ].join(",")
+        );
+    }
+    return lines.join("\n");
+}
+
+function downloadCsv(csv: string, filename: string) {
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+}
 
 type Role = { id: string; title: string };
 
@@ -58,12 +89,23 @@ export default function CandidatesSearchPage() {
 
     return (
         <main className="mx-auto max-w-4xl px-6 py-16">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                Candidates
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-                Search scored candidates across every role by skill, keyword, or experience.
-            </p>
+            <div className="flex items-start justify-between">
+                <div>
+                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                        Candidates
+                    </h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        Search scored candidates across every role by skill, keyword, or experience.
+                    </p>
+                </div>
+                <button
+                    onClick={() => downloadCsv(toCsv(results), "candidates.csv")}
+                    disabled={results.length === 0}
+                    className="rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                >
+                    Export CSV
+                </button>
+            </div>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-4">
                 <input
