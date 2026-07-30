@@ -1,6 +1,6 @@
-import { getCandidateDisplayName } from "@/lib/displayName";
 "use client";
 
+import { getCandidateDisplayName } from "@/lib/displayName";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {

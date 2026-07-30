@@ -23,11 +23,21 @@ export default function EventModal({
     state: ModalState;
     onClose: (didChange: boolean) => void;
 }) {
+    // In create mode the form is seeded straight from props. Edit mode starts
+    // blank and is filled in by the fetch below. CalendarView keys this
+    // component on the event identity, so a different event remounts it and
+    // these initializers run again.
     const [title, setTitle] = useState("");
-    const [start, setStart] = useState("");
-    const [end, setEnd] = useState("");
+    const [start, setStart] = useState(() =>
+        state.mode === "create" ? toLocalInputValue(state.start) : ""
+    );
+    const [end, setEnd] = useState(() =>
+        state.mode === "create" ? toLocalInputValue(state.end) : ""
+    );
     const [notes, setNotes] = useState("");
-    const [candidateId, setCandidateId] = useState("");
+    const [candidateId, setCandidateId] = useState(() =>
+        state.mode === "create" ? state.candidateId ?? "" : ""
+    );
     const [candidates, setCandidates] = useState<Candidate[]>([]);
     const [loading, setLoading] = useState(state.mode === "edit");
     const [saving, setSaving] = useState(false);
@@ -38,13 +48,9 @@ export default function EventModal({
             .then(setCandidates);
     }, []);
 
+    // Edit mode only — create mode is already seeded from props above.
     useEffect(() => {
-        if (state.mode === "create") {
-            setStart(toLocalInputValue(state.start));
-            setEnd(toLocalInputValue(state.end));
-            if (state.candidateId) setCandidateId(state.candidateId);
-            return;
-        }
+        if (state.mode !== "edit") return;
         fetch(`/api/events/${state.eventId}`)
             .then((res) => res.json())
             .then((event) => {
