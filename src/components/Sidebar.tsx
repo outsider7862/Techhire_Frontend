@@ -8,6 +8,7 @@ const NAV_ITEMS = [
     { href: "/roles", label: "Roles" },
     { href: "/candidates", label: "Candidates" },
     { href: "/calendar", label: "Calendar" },
+    { href: "/analytics", label: "Analytics" },
 ];
 
 export default function Sidebar({ userName }: { userName: string }) {

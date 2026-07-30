@@ -25,7 +25,10 @@ export async function POST(req: NextRequest) {
       data: {
         status: "SCORED",
         name: parsed.name,
+        email: parsed.email || null,
+        phone: parsed.phone || null,
         skills: parsed.skills,
+        scoredAt: new Date(),
         techStack: parsed.tech_stack,
         yearsExperience: parsed.years_experience,
         summary: parsed.summary,

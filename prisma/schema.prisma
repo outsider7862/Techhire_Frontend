@@ -55,12 +55,15 @@ model Candidate {
 
   // --- Populated once the AI service returns a result ---
   name            String?
+  email           String?
+  phone           String?
   skills          String[]
   techStack       String[]
   yearsExperience Float?
   summary         String?
   score           Int? // 0-100
   scoreReasoning  String?
+  scoredAt        DateTime? // set when status transitions to SCORED — used by analytics
 
   stage  PipelineStage @default(APPLIED)
   notes  Note[]
