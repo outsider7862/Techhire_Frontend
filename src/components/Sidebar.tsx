@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 const NAV_ITEMS = [
     { href: "/roles", label: "Roles" },
@@ -9,7 +10,7 @@ const NAV_ITEMS = [
     { href: "/calendar", label: "Calendar" },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ userName }: { userName: string }) {
     const pathname = usePathname();
 
     return (
@@ -38,6 +39,15 @@ export default function Sidebar() {
                     );
                 })}
             </nav>
+            <div className="border-t border-border px-3 py-3">
+                <p className="truncate px-3 text-xs text-muted-foreground">{userName}</p>
+                <button
+                    onClick={() => signOut({ callbackUrl: "/login" })}
+                    className="mt-1 w-full rounded-md px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                    Sign out
+                </button>
+            </div>
         </aside>
     );
 }

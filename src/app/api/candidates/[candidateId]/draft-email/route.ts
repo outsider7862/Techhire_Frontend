@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCandidateDisplayName } from "@/lib/displayName";
+import { requireAuth } from "@/lib/requireAuth";
 
 const PARSING_SERVICE_URL = process.env.PARSING_SERVICE_URL!;
 const PARSING_SERVICE_TOKEN = process.env.PARSING_SERVICE_TOKEN!;
@@ -10,6 +11,10 @@ export async function POST(
     { params }: { params: Promise<{ candidateId: string }> }
 ) {
     const { candidateId } = await params;
+
+    const { error } = await requireAuth();
+    if (error) return error;
+
     const { emailType, instruction, previousDraft } = await req.json();
 
     const candidate = await prisma.candidate.findUnique({
@@ -34,7 +39,7 @@ export async function POST(
                 min_years_experience: candidate.role.minYearsExperience,
                 description: candidate.role.description,
             },
-            candidate_name: guessNameFromFileName(candidate.fileName),
+            candidate_name: getCandidateDisplayName(candidate),
             candidate_summary: candidate.summary ?? "",
             candidate_skills: candidate.skills,
             email_type: emailType,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -22,20 +22,23 @@ type ModalState =
 
 export default function CalendarView() {
     const calendarRef = useRef<FullCalendar | null>(null);
-    const [modalState, setModalState] = useState<ModalState>(null);
-    const [duration, setDuration] = useState(30);
     const searchParams = useSearchParams();
+    const [duration, setDuration] = useState(30);
 
-    useEffect(() => {
+    // Arriving from a candidate's "+ Schedule" link opens the create modal
+    // prefilled. Computed as the initial state rather than in an effect, so
+    // it still happens once on mount and never reacts to later param changes.
+    const [modalState, setModalState] = useState<ModalState>(() => {
         const presetCandidateId = searchParams.get("candidateId");
-        if (presetCandidateId) {
-            const now = new Date();
-            const in30 = new Date(now.getTime() + 30 * 60 * 1000);
-            setModalState({ mode: "create", start: now, end: in30, candidateId: presetCandidateId });
-        }
-        // Only run once on mount — deliberately not reacting to further param changes
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        if (!presetCandidateId) return null;
+        const now = new Date();
+        return {
+            mode: "create",
+            start: now,
+            end: new Date(now.getTime() + 30 * 60 * 1000),
+            candidateId: presetCandidateId,
+        };
+    });
 
     const fetchEvents = useCallback(
         async (info: { start: Date; end: Date }): Promise<EventInput[]> => {
@@ -168,7 +171,19 @@ export default function CalendarView() {
                 />
             </div>
 
-            {modalState && <EventModal state={modalState} onClose={handleModalClose} />}
+            {modalState && (
+                <EventModal
+                    // Remounts on a genuinely different event, so the form
+                    // re-seeds from the new state instead of resyncing via an effect.
+                    key={
+                        modalState.mode === "edit"
+                            ? modalState.eventId
+                            : `create-${modalState.start.getTime()}-${modalState.end.getTime()}`
+                    }
+                    state={modalState}
+                    onClose={handleModalClose}
+                />
+            )}
         </div>
     );
 }

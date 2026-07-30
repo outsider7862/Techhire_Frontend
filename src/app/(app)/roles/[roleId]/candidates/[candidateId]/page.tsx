@@ -18,7 +18,10 @@ export default async function CandidatePage({
         where: { id: candidateId },
         include: {
             role: true,
-            notes: { orderBy: { createdAt: "desc" } },
+            notes: {
+                orderBy: { createdAt: "desc" },
+                include: { author: { select: { name: true } } },
+            },
             events: { orderBy: { startTime: "asc" } },
         },
     });

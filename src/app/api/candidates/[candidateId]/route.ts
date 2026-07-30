@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuth } from "@/lib/requireAuth";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ candidateId: string }> }
 ) {
   const { candidateId } = await params;
+
+  const { error } = await requireAuth();
+  if (error) return error;
 
   const candidate = await prisma.candidate.findUnique({
     where: { id: candidateId },
@@ -35,6 +39,10 @@ export async function PATCH(
   { params }: { params: Promise<{ candidateId: string }> }
 ) {
   const { candidateId } = await params;
+
+  const { error } = await requireAuth();
+  if (error) return error;
+
   const { stage } = await req.json();
 
   const candidate = await prisma.candidate.update({
