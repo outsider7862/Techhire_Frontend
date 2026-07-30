@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuth } from "@/lib/requireAuth";
 
 const VALID_STAGES = [
     "APPLIED",
@@ -19,6 +20,9 @@ const VALID_STAGES = [
  * see module docstring reasoning above.
  */
 export async function GET(req: NextRequest) {
+    const { error } = await requireAuth();
+    if (error) return error;
+
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.trim().toLowerCase() ?? "";
     const minYears = searchParams.get("minYears");

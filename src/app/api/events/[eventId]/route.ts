@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuth } from "@/lib/requireAuth";
 
 export async function GET(
     _req: NextRequest,
     { params }: { params: Promise<{ eventId: string }> }
 ) {
     const { eventId } = await params;
+
+    const { error } = await requireAuth();
+    if (error) return error;
+
     const event = await prisma.event.findUnique({ where: { id: eventId } });
     if (!event) {
         return NextResponse.json({ error: "Event not found" }, { status: 404 });
@@ -18,6 +23,10 @@ export async function PATCH(
     { params }: { params: Promise<{ eventId: string }> }
 ) {
     const { eventId } = await params;
+
+    const { error } = await requireAuth();
+    if (error) return error;
+
     const body = await req.json();
     const { title, startTime, endTime, candidateId, notes, force } = body;
 
@@ -64,6 +73,10 @@ export async function DELETE(
     { params }: { params: Promise<{ eventId: string }> }
 ) {
     const { eventId } = await params;
+
+    const { error } = await requireAuth();
+    if (error) return error;
+
     await prisma.event.delete({ where: { id: eventId } });
     return NextResponse.json({ ok: true });
 }

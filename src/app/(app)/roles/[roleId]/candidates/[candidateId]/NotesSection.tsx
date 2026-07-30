@@ -3,7 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Note = { id: string; body: string; createdAt: string | Date };
+type Note = {
+    id: string;
+    body: string;
+    createdAt: string | Date;
+    author: { name: string } | null;
+};
 
 export default function NotesSection({
     candidateId,
@@ -64,9 +69,10 @@ export default function NotesSection({
                     <li className="text-sm text-slate-400">No notes yet.</li>
                 )}
                 {notes.map((note) => (
-                    <li key={note.id} className="text-sm text-slate-700">
+                    <li key={note.id} className="text-sm text-foreground">
                         {note.body}
-                        <span className="ml-2 text-xs text-slate-400">
+                        <span className="ml-2 text-xs text-muted-foreground">
+                            {note.author ? `${note.author.name} · ` : ""}
                             {new Date(note.createdAt).toLocaleString()}
                         </span>
                     </li>

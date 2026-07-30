@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuth } from "@/lib/requireAuth";
 
 const BUSINESS_START_HOUR = 9;
 const BUSINESS_END_HOUR = 17;
@@ -44,6 +45,9 @@ function findNextAvailableSlot(
 }
 
 export async function POST(req: NextRequest) {
+    const { error } = await requireAuth();
+    if (error) return error;
+
     const { durationMinutes } = await req.json();
     const duration = Number(durationMinutes) || 30;
 

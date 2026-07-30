@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createSignedReadUrl } from "@/lib/storage";
 import { startBatch } from "@/lib/parsingService";
 import { resolveIfStale } from "@/lib/staleBatches";
+import { requireAuth } from "@/lib/requireAuth";
 
 /**
  * GET /api/batches/:batchId
@@ -15,6 +16,9 @@ export async function GET(
   { params }: { params: Promise<{ batchId: string }> }
 ) {
   const { batchId } = await params;
+
+  const { error } = await requireAuth();
+  if (error) return error;
 
   await resolveIfStale(batchId);
 
@@ -52,6 +56,9 @@ export async function POST(
   { params }: { params: Promise<{ batchId: string }> }
 ) {
   const { batchId } = await params;
+
+  const { error } = await requireAuth();
+  if (error) return error;
 
   const batch = await prisma.batch.findUnique({
     where: { id: batchId },

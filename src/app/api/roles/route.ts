@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuth } from "@/lib/requireAuth";
 
 export async function GET() {
+  const { error } = await requireAuth();
+  if (error) return error;
+
   const roles = await prisma.role.findMany({
     orderBy: { createdAt: "desc" },
     include: { _count: { select: { candidates: true } } },
@@ -10,6 +14,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const { error } = await requireAuth();
+  if (error) return error;
+
   const body = await req.json();
   const { title, description, requiredSkills, minYearsExperience } = body;
 

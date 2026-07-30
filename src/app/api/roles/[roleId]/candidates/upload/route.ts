@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSignedUploadUrl } from "@/lib/storage";
+import { requireAuth } from "@/lib/requireAuth";
 
 /**
  * POST /api/roles/:roleId/candidates/upload
@@ -19,6 +20,10 @@ export async function POST(
   { params }: { params: Promise<{ roleId: string }> }
 ) {
   const { roleId } = await params;
+
+  const { error } = await requireAuth();
+  if (error) return error;
+
   const body = await req.json();
   const files: { fileName: string }[] = body.files ?? [];
 

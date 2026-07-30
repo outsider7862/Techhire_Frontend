@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuth } from "@/lib/requireAuth";
 
 export async function GET(
     _req: NextRequest,
     { params }: { params: Promise<{ roleId: string }> }
 ) {
     const { roleId } = await params;
+
+    const { error } = await requireAuth();
+    if (error) return error;
+
     const role = await prisma.role.findUnique({ where: { id: roleId } });
     if (!role) {
         return NextResponse.json({ error: "Role not found" }, { status: 404 });
@@ -18,6 +23,10 @@ export async function PATCH(
     { params }: { params: Promise<{ roleId: string }> }
 ) {
     const { roleId } = await params;
+
+    const { error } = await requireAuth();
+    if (error) return error;
+
     const body = await req.json();
     const { title, description, requiredSkills, minYearsExperience } = body;
 
@@ -39,6 +48,10 @@ export async function DELETE(
     { params }: { params: Promise<{ roleId: string }> }
 ) {
     const { roleId } = await params;
+
+    const { error } = await requireAuth();
+    if (error) return error;
+
     // Cascades to that role's Candidate and Batch rows automatically —
     // see onDelete: Cascade on those relations in schema.prisma.
     await prisma.role.delete({ where: { id: roleId } });
