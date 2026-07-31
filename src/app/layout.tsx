@@ -29,6 +29,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      // ThemeScript adds `dark` to <html> before React hydrates, so the
+      // client class list intentionally differs from the server's. Scope the
+      // hydration warning suppression to this one element only.
+      suppressHydrationWarning
       className={`${firaSans.variable} ${firaCode.variable} h-full antialiased`}
     >
       <head>
