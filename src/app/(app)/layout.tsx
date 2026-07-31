@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { createClient } from "@/utils/supabase/server";
+import { prisma } from "@/lib/prisma";
 import Sidebar from "@/components/Sidebar";
 
 export default async function AppLayout({
@@ -7,12 +8,18 @@ export default async function AppLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const session = await auth();
-    if (!session?.user) redirect("/login");
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) redirect("/login");
+
+    const profile = await prisma.profile.findUnique({ where: { id: user.id } });
 
     return (
         <div className="flex min-h-screen">
-            <Sidebar userName={session.user.name ?? session.user.email ?? "Account"} />
+            <Sidebar userName={profile?.name ?? user.email ?? "Account"} />
             <div className="flex-1 overflow-x-hidden">{children}</div>
         </div>
     );

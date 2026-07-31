@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { createClient } from "@/utils/supabase/client";
 import Avatar from "@/components/Avatar";
 
-type User = { id: string; name: string; email: string; createdAt: string | Date };
+type Profile = { id: string; name: string; email: string; createdAt: string | Date };
 
-export default function ProfileForm({ user }: { user: User }) {
+export default function ProfileForm({ user }: { user: Profile }) {
     const router = useRouter();
     const [name, setName] = useState(user.name);
     const [savingName, setSavingName] = useState(false);
@@ -44,15 +44,23 @@ export default function ProfileForm({ user }: { user: User }) {
         setPasswordError("");
         setPasswordSuccess(false);
 
-        const res = await fetch("/api/profile/password", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ currentPassword, newPassword }),
+        const supabase = createClient();
+
+        const { error: verifyError } = await supabase.auth.signInWithPassword({
+            email: user.email,
+            password: currentPassword,
         });
 
-        if (!res.ok) {
-            const data = await res.json();
-            setPasswordError(data.error ?? "Couldn't change password");
+        if (verifyError) {
+            setPasswordError("Current password is incorrect");
+            setSavingPassword(false);
+            return;
+        }
+
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+        if (error) {
+            setPasswordError(error.message);
             setSavingPassword(false);
             return;
         }
@@ -73,7 +81,10 @@ export default function ProfileForm({ user }: { user: User }) {
         }
         setDeleting(true);
         await fetch("/api/profile", { method: "DELETE" });
-        await signOut({ callbackUrl: "/login" });
+        const supabase = createClient();
+        await supabase.auth.signOut();
+        router.push("/login");
+        router.refresh();
     }
 
     return (

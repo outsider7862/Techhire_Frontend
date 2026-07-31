@@ -1,20 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/requireAuth";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 export async function GET() {
-    const { session, error } = await requireAuth();
+    const { user, error } = await requireAuth();
     if (error) return error;
 
-    const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { id: true, name: true, email: true, createdAt: true },
-    });
-    return NextResponse.json(user);
+    const profile = await prisma.profile.findUnique({ where: { id: user.id } });
+    return NextResponse.json(profile);
 }
 
 export async function PATCH(req: NextRequest) {
-    const { session, error } = await requireAuth();
+    const { user, error } = await requireAuth();
     if (error) return error;
 
     const { name } = await req.json();
@@ -22,18 +20,24 @@ export async function PATCH(req: NextRequest) {
         return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
-    const user = await prisma.user.update({
-        where: { id: session.user.id },
+    const profile = await prisma.profile.update({
+        where: { id: user.id },
         data: { name: name.trim() },
-        select: { id: true, name: true, email: true },
     });
-    return NextResponse.json(user);
+    return NextResponse.json(profile);
 }
 
 export async function DELETE() {
-    const { session, error } = await requireAuth();
+    const { user, error } = await requireAuth();
     if (error) return error;
 
-    await prisma.user.delete({ where: { id: session.user.id } });
+    const admin = createAdminClient();
+    const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
+    if (deleteError) {
+        return NextResponse.json({ error: deleteError.message }, { status: 500 });
+    }
+
+    // Profile row is deleted automatically via the auth.users FK cascade
+    // set up in Part E — no separate Prisma delete needed.
     return NextResponse.json({ ok: true });
 }

@@ -10,7 +10,7 @@ export async function POST(
     req: NextRequest,
     { params }: { params: Promise<{ candidateId: string }> }
 ) {
-    const { session, error } = await requireAuth();
+    const { user, error } = await requireAuth();
     if (error) return error;
 
     const { candidateId } = await params;
@@ -24,7 +24,7 @@ export async function POST(
     // note's byline straight from this response — NotesSection holds its
     // list in local state, so a refresh alone wouldn't fill it in.
     const note = await prisma.note.create({
-        data: { candidateId, body: body.trim(), authorId: session.user.id },
+        data: { candidateId, body: body.trim(), authorId: user.id },
         include: { author: { select: { name: true } } },
     });
 

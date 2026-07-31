@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Avatar from "@/components/Avatar";
 
 export default async function TeamPage() {
-    const users = await prisma.user.findMany({
+    const users = await prisma.profile.findMany({
         orderBy: { createdAt: "asc" },
         select: { id: true, name: true, email: true, createdAt: true },
     });

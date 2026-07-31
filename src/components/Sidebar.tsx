@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 import Avatar from "@/components/Avatar";
 
 const NAV_ITEMS = [
@@ -15,6 +15,14 @@ const NAV_ITEMS = [
 
 export default function Sidebar({ userName }: { userName: string }) {
     const pathname = usePathname();
+    const router = useRouter();
+
+    async function handleSignOut() {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+        router.push("/login");
+        router.refresh();
+    }
 
     return (
         <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-border bg-card">
@@ -66,7 +74,7 @@ export default function Sidebar({ userName }: { userName: string }) {
                     Settings
                 </Link>
                 <button
-                    onClick={() => signOut({ callbackUrl: "/login" })}
+                    onClick={handleSignOut}
                     className="mt-1 w-full rounded-md px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                     Sign out

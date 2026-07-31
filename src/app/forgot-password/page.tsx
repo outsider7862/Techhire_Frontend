@@ -4,12 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 
-export default function SignupPage() {
-    const [name, setName] = useState("");
+export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
     const [sent, setSent] = useState(false);
+    const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
     async function handleSubmit(e: React.FormEvent) {
@@ -18,13 +16,8 @@ export default function SignupPage() {
         setError("");
 
         const supabase = createClient();
-        const { error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: { name }, // becomes raw_user_meta_data.name — read by the trigger in Part E
-                emailRedirectTo: `${window.location.origin}/auth/confirm?next=/roles`,
-            },
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/auth/confirm?next=/reset-password`,
         });
 
         if (error) {
@@ -40,24 +33,15 @@ export default function SignupPage() {
     if (sent) {
         return (
             <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6 text-center">
-                <p className="text-sm text-foreground">
-                    Check your email to confirm your account before signing in.
-                </p>
+                <p className="text-sm text-foreground">Check your email for a password reset link.</p>
             </main>
         );
     }
 
     return (
         <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
-            <h1 className="text-xl font-semibold text-foreground">Create an account</h1>
+            <h1 className="text-xl font-semibold text-foreground">Reset your password</h1>
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-                <input
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Full name"
-                    className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground"
-                />
                 <input
                     type="email"
                     required
@@ -66,28 +50,18 @@ export default function SignupPage() {
                     placeholder="Email"
                     className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground"
                 />
-                <input
-                    type="password"
-                    required
-                    minLength={8}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password (8+ characters)"
-                    className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground"
-                />
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <button
                     type="submit"
                     disabled={loading}
                     className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                 >
-                    {loading ? "Creating…" : "Create account"}
+                    {loading ? "Sending…" : "Send reset link"}
                 </button>
             </form>
             <p className="mt-4 text-sm text-muted-foreground">
-                Already have an account?{" "}
                 <Link href="/login" className="text-primary hover:underline">
-                    Sign in
+                    Back to sign in
                 </Link>
             </p>
         </main>
