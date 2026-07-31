@@ -166,7 +166,7 @@ export default function UploadWidget({ roleId }: { roleId: string }) {
               setProgress(null);
               if (inputRef.current) inputRef.current.value = "";
             }}
-            className="ml-2 font-medium text-slate-900 underline underline-offset-2"
+            className="ml-2 font-medium text-foreground underline underline-offset-2"
           >
             Upload more
           </button>

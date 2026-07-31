@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fira_Sans, Fira_Code } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import ThemeScript from "@/components/ThemeScript";
 
 const firaSans = Fira_Sans({
   variable: "--font-fira-sans",
@@ -30,6 +31,9 @@ export default function RootLayout({
       lang="en"
       className={`${firaSans.variable} ${firaCode.variable} h-full antialiased`}
     >
+      <head>
+        <ThemeScript />
+      </head>
       <body className="min-h-full flex flex-col font-sans">
         <Providers>{children}</Providers>
       </body>

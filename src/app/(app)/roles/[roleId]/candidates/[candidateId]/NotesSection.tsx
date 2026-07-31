@@ -47,26 +47,26 @@ export default function NotesSection({
 
     return (
         <section>
-            <h2 className="text-sm font-medium text-slate-500">Notes</h2>
+            <h2 className="text-sm font-medium text-muted-foreground">Notes</h2>
             <div className="mt-2 flex gap-2">
                 <input
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAdd()}
                     placeholder="Add a note…"
-                    className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
+                    className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
                 />
                 <button
                     onClick={handleAdd}
                     disabled={submitting}
-                    className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+                    className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
                 >
                     Add
                 </button>
             </div>
             <ul className="mt-4 space-y-3">
                 {notes.length === 0 && (
-                    <li className="text-sm text-slate-400">No notes yet.</li>
+                    <li className="text-sm text-muted-foreground">No notes yet.</li>
                 )}
                 {notes.map((note) => (
                     <li key={note.id} className="text-sm text-foreground">

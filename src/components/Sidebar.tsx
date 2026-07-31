@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import Avatar from "@/components/Avatar";
 
 const NAV_ITEMS = [
     { href: "/roles", label: "Roles" },
     { href: "/candidates", label: "Candidates" },
     { href: "/calendar", label: "Calendar" },
     { href: "/analytics", label: "Analytics" },
+    { href: "/team", label: "Team" },
 ];
 
 export default function Sidebar({ userName }: { userName: string }) {
@@ -41,7 +43,28 @@ export default function Sidebar({ userName }: { userName: string }) {
                 })}
             </nav>
             <div className="border-t border-border px-3 py-3">
-                <p className="truncate px-3 text-xs text-muted-foreground">{userName}</p>
+                <div className="flex items-center gap-2 px-3 py-1.5">
+                    <Avatar name={userName} size="sm" />
+                    <p className="truncate text-xs text-muted-foreground">{userName}</p>
+                </div>
+                <Link
+                    href="/profile"
+                    className={`mt-1 block rounded-md px-3 py-2 text-sm transition-colors ${pathname === "/profile"
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        }`}
+                >
+                    Profile
+                </Link>
+                <Link
+                    href="/settings"
+                    className={`block rounded-md px-3 py-2 text-sm transition-colors ${pathname === "/settings"
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        }`}
+                >
+                    Settings
+                </Link>
                 <button
                     onClick={() => signOut({ callbackUrl: "/login" })}
                     className="mt-1 w-full rounded-md px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"

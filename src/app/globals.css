@@ -42,6 +42,27 @@
   --font-mono: var(--font-fira-code);
 }
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+.dark {
+  --background: #0B1220;
+  --foreground: #E2E8F0;
+  --card: #111827;
+  --card-foreground: #E2E8F0;
+  --primary: #3B82F6;
+  --primary-foreground: #0B1220;
+  --secondary: #60A5FA;
+  --secondary-foreground: #0B1220;
+  --accent: #F59E0B;
+  --accent-foreground: #0B1220;
+  --muted: #1E293B;
+  --muted-foreground: #94A3B8;
+  --border: #1E293B;
+  --destructive: #F87171;
+  --destructive-foreground: #0B1220;
+  --ring: #3B82F6;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
