@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getCandidateDisplayName } from "@/lib/displayName";
-import { requireAuth } from "@/lib/requireAuth";
+import { requireTeam } from "@/lib/requireTeam";
+import { getCandidateForTeam } from "@/lib/teamScoped";
 
 const PARSING_SERVICE_URL = process.env.PARSING_SERVICE_URL!;
 const PARSING_SERVICE_TOKEN = process.env.PARSING_SERVICE_TOKEN!;
@@ -10,21 +10,14 @@ export async function POST(
     req: NextRequest,
     { params }: { params: Promise<{ candidateId: string }> }
 ) {
-    const { candidateId } = await params;
-
-    const { error } = await requireAuth();
+    const { teamId, error } = await requireTeam();
     if (error) return error;
 
+    const { candidateId } = await params;
+    const { candidate, error: candErr } = await getCandidateForTeam(candidateId, teamId);
+    if (candErr) return candErr;
+
     const { emailType, instruction, previousDraft } = await req.json();
-
-    const candidate = await prisma.candidate.findUnique({
-        where: { id: candidateId },
-        include: { role: true },
-    });
-
-    if (!candidate) {
-        return NextResponse.json({ error: "Candidate not found" }, { status: 404 });
-    }
 
     const res = await fetch(`${PARSING_SERVICE_URL}/draft-email`, {
         method: "POST",

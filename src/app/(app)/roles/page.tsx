@@ -1,8 +1,20 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/lib/prisma";
 
 export default async function RolesIndexPage() {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) redirect("/login");
+
+    const profile = await prisma.profile.findUnique({ where: { id: user.id } });
+    if (!profile?.teamId) redirect("/team");
+
     const roles = await prisma.role.findMany({
+        where: { teamId: profile.teamId },
         orderBy: { createdAt: "desc" },
         include: { _count: { select: { candidates: true } } },
     });

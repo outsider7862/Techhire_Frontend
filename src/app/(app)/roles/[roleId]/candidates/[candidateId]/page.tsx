@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/lib/prisma";
 import NotesSection from "./NotesSection";
 import EmailDraftPanel from "./EmailDraftPanel";
@@ -15,6 +16,14 @@ export default async function CandidatePage({
 }) {
     const { roleId, candidateId } = await params;
 
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) notFound();
+
+    const callerProfile = await prisma.profile.findUnique({ where: { id: user.id } });
+
     const candidate = await prisma.candidate.findUnique({
         where: { id: candidateId },
         include: {
@@ -27,7 +36,12 @@ export default async function CandidatePage({
         },
     });
 
-    if (!candidate || candidate.roleId !== roleId) notFound();
+    if (
+        !candidate ||
+        candidate.roleId !== roleId ||
+        candidate.role.teamId !== callerProfile?.teamId
+    )
+        notFound();
 
     const displayName = getCandidateDisplayName(candidate);
     const upcomingEvents = candidate.events.filter((e) => e.startTime >= new Date());

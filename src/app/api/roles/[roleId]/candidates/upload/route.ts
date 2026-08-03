@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSignedUploadUrl } from "@/lib/storage";
-import { requireAuth } from "@/lib/requireAuth";
+import { requireTeam } from "@/lib/requireTeam";
+import { getRoleForTeam } from "@/lib/teamScoped";
 
 /**
  * POST /api/roles/:roleId/candidates/upload
@@ -19,10 +20,14 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ roleId: string }> }
 ) {
-  const { roleId } = await params;
-
-  const { error } = await requireAuth();
+  const { teamId, error } = await requireTeam();
   if (error) return error;
+
+  const { roleId } = await params;
+  // Confirms the target role belongs to the caller's team before anyone
+  // can upload resumes into it (also covers the not-found case, as 404).
+  const { error: roleError } = await getRoleForTeam(roleId, teamId);
+  if (roleError) return roleError;
 
   const body = await req.json();
   const files: { fileName: string }[] = body.files ?? [];
@@ -54,11 +59,6 @@ export async function POST(
       },
       { status: 400 }
     );
-  }
-
-  const role = await prisma.role.findUnique({ where: { id: roleId } });
-  if (!role) {
-    return NextResponse.json({ error: "Role not found" }, { status: 404 });
   }
 
   const batch = await prisma.batch.create({

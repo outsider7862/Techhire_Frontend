@@ -3,31 +3,24 @@ import { prisma } from "@/lib/prisma";
 import { createSignedReadUrl } from "@/lib/storage";
 import { startBatch } from "@/lib/parsingService";
 import { resolveIfStale } from "@/lib/staleBatches";
-import { requireAuth } from "@/lib/requireAuth";
+import { requireTeam } from "@/lib/requireTeam";
 
-/**
- * GET /api/batches/:batchId
- * Cheap progress check — the frontend polls this every couple of seconds
- * while a batch is running. Counts scored/failed/pending candidates
- * rather than requiring any state from the FastAPI side.
- */
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ batchId: string }> }
 ) {
-  const { batchId } = await params;
-
-  const { error } = await requireAuth();
+  const { teamId, error } = await requireTeam();
   if (error) return error;
 
+  const { batchId } = await params;
   await resolveIfStale(batchId);
 
   const batch = await prisma.batch.findUnique({
     where: { id: batchId },
-    include: { candidates: { select: { status: true } } },
+    include: { candidates: { select: { status: true } }, role: true },
   });
 
-  if (!batch) {
+  if (!batch || batch.role.teamId !== teamId) {
     return NextResponse.json({ error: "Batch not found" }, { status: 404 });
   }
 
@@ -44,28 +37,21 @@ export async function GET(
   });
 }
 
-/**
- * POST /api/batches/:batchId
- * Called by the frontend once every file in the batch has finished
- * uploading to storage. This is the trigger that actually starts AI
- * processing — deliberately a separate step from the upload-URL request,
- * so FastAPI never tries to download a file that hasn't arrived yet.
- */
 export async function POST(
   _req: NextRequest,
   { params }: { params: Promise<{ batchId: string }> }
 ) {
-  const { batchId } = await params;
-
-  const { error } = await requireAuth();
+  const { teamId, error } = await requireTeam();
   if (error) return error;
+
+  const { batchId } = await params;
 
   const batch = await prisma.batch.findUnique({
     where: { id: batchId },
     include: { role: true, candidates: true },
   });
 
-  if (!batch) {
+  if (!batch || batch.role.teamId !== teamId) {
     return NextResponse.json({ error: "Batch not found" }, { status: 404 });
   }
 

@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/requireAuth";
+import { requireTeam } from "@/lib/requireTeam";
 
 export async function GET() {
-  const { error } = await requireAuth();
+  const { teamId, error } = await requireTeam();
   if (error) return error;
 
   const roles = await prisma.role.findMany({
+    where: { teamId },
     orderBy: { createdAt: "desc" },
     include: { _count: { select: { candidates: true } } },
   });
@@ -14,7 +15,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { error } = await requireAuth();
+  const { teamId, error } = await requireTeam();
   if (error) return error;
 
   const body = await req.json();
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
 
   const role = await prisma.role.create({
     data: {
+      teamId,
       title,
       description: description ?? "",
       requiredSkills: requiredSkills ?? [],

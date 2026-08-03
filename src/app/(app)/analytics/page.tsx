@@ -1,18 +1,45 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/lib/prisma";
 import AnalyticsCharts from "./AnalyticsCharts";
 
 const STAGES = ["APPLIED", "SCREENING", "INTERVIEW", "OFFER", "REJECTED", "HIRED"] as const;
 
 export default async function AnalyticsPage() {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) redirect("/login");
+
+    const profile = await prisma.profile.findUnique({ where: { id: user.id } });
+    if (!profile?.teamId) redirect("/team");
+
+    const teamId = profile.teamId;
+
     const [roleCount, statusCounts, stageCounts, avgScoreResult, roles, scoredCandidates] =
         await Promise.all([
-            prisma.role.count(),
-            prisma.candidate.groupBy({ by: ["status"], _count: true }),
-            prisma.candidate.groupBy({ by: ["stage"], _count: true }),
-            prisma.candidate.aggregate({ where: { status: "SCORED" }, _avg: { score: true } }),
-            prisma.role.findMany({ select: { title: true, _count: { select: { candidates: true } } } }),
+            prisma.role.count({ where: { teamId } }),
+            prisma.candidate.groupBy({
+                by: ["status"],
+                _count: true,
+                where: { role: { teamId } },
+            }),
+            prisma.candidate.groupBy({
+                by: ["stage"],
+                _count: true,
+                where: { role: { teamId } },
+            }),
+            prisma.candidate.aggregate({
+                where: { status: "SCORED", role: { teamId } },
+                _avg: { score: true },
+            }),
+            prisma.role.findMany({
+                where: { teamId },
+                select: { title: true, _count: { select: { candidates: true } } },
+            }),
             prisma.candidate.findMany({
-                where: { status: "SCORED", scoredAt: { not: null } },
+                where: { status: "SCORED", scoredAt: { not: null }, role: { teamId } },
                 select: { createdAt: true, scoredAt: true },
             }),
         ]);
@@ -39,7 +66,7 @@ export default async function AnalyticsPage() {
         <main className="mx-auto max-w-5xl px-6 py-16">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Analytics</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-                Aggregate stats across every role and candidate.
+                Aggregate stats across your team&apos;s roles and candidates.
             </p>
 
             <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">

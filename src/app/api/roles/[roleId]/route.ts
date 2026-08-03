@@ -1,59 +1,60 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/requireAuth";
+import { requireTeam } from "@/lib/requireTeam";
+import { getRoleForTeam } from "@/lib/teamScoped";
 
 export async function GET(
-    _req: NextRequest,
-    { params }: { params: Promise<{ roleId: string }> }
+  _req: NextRequest,
+  { params }: { params: Promise<{ roleId: string }> }
 ) {
-    const { roleId } = await params;
+  const { teamId, error } = await requireTeam();
+  if (error) return error;
 
-    const { error } = await requireAuth();
-    if (error) return error;
+  const { roleId } = await params;
+  const { role, error: roleError } = await getRoleForTeam(roleId, teamId);
+  if (roleError) return roleError;
 
-    const role = await prisma.role.findUnique({ where: { id: roleId } });
-    if (!role) {
-        return NextResponse.json({ error: "Role not found" }, { status: 404 });
-    }
-    return NextResponse.json(role);
+  return NextResponse.json(role);
 }
 
 export async function PATCH(
-    req: NextRequest,
-    { params }: { params: Promise<{ roleId: string }> }
+  req: NextRequest,
+  { params }: { params: Promise<{ roleId: string }> }
 ) {
-    const { roleId } = await params;
+  const { teamId, error } = await requireTeam();
+  if (error) return error;
 
-    const { error } = await requireAuth();
-    if (error) return error;
+  const { roleId } = await params;
+  const { error: roleError } = await getRoleForTeam(roleId, teamId);
+  if (roleError) return roleError;
 
-    const body = await req.json();
-    const { title, description, requiredSkills, minYearsExperience } = body;
+  const body = await req.json();
+  const { title, description, requiredSkills, minYearsExperience } = body;
 
-    const role = await prisma.role.update({
-        where: { id: roleId },
-        data: {
-            ...(title !== undefined ? { title } : {}),
-            ...(description !== undefined ? { description } : {}),
-            ...(requiredSkills !== undefined ? { requiredSkills } : {}),
-            ...(minYearsExperience !== undefined ? { minYearsExperience } : {}),
-        },
-    });
+  const role = await prisma.role.update({
+    where: { id: roleId },
+    data: {
+      ...(title !== undefined ? { title } : {}),
+      ...(description !== undefined ? { description } : {}),
+      ...(requiredSkills !== undefined ? { requiredSkills } : {}),
+      ...(minYearsExperience !== undefined ? { minYearsExperience } : {}),
+    },
+  });
 
-    return NextResponse.json(role);
+  return NextResponse.json(role);
 }
 
 export async function DELETE(
-    _req: NextRequest,
-    { params }: { params: Promise<{ roleId: string }> }
+  _req: NextRequest,
+  { params }: { params: Promise<{ roleId: string }> }
 ) {
-    const { roleId } = await params;
+  const { teamId, error } = await requireTeam();
+  if (error) return error;
 
-    const { error } = await requireAuth();
-    if (error) return error;
+  const { roleId } = await params;
+  const { error: roleError } = await getRoleForTeam(roleId, teamId);
+  if (roleError) return roleError;
 
-    // Cascades to that role's Candidate and Batch rows automatically —
-    // see onDelete: Cascade on those relations in schema.prisma.
-    await prisma.role.delete({ where: { id: roleId } });
-    return NextResponse.json({ ok: true });
+  await prisma.role.delete({ where: { id: roleId } });
+  return NextResponse.json({ ok: true });
 }

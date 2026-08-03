@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/lib/prisma";
 import UploadWidget from "./UploadWidget";
 import PipelineBoard from "./PipelineBoard";
@@ -15,6 +16,14 @@ export default async function RolePage({
 
   await resolveStaleBatchesForRole(roleId);
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) notFound();
+
+  const callerProfile = await prisma.profile.findUnique({ where: { id: user.id } });
+
   const role = await prisma.role.findUnique({
     where: { id: roleId },
     include: {
@@ -24,7 +33,7 @@ export default async function RolePage({
     },
   });
 
-  if (!role) notFound();
+  if (!role || role.teamId !== callerProfile?.teamId) notFound();
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
