@@ -18,7 +18,7 @@ export default async function TeamPage() {
 
     if (!profile?.team) {
         return (
-            <main className="mx-auto max-w-md px-6 py-16">
+            <main className="animate-rise mx-auto max-w-md px-6 py-16">
                 <h1 className="text-2xl font-semibold tracking-tight text-foreground">Team</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
                     Create a team, or join one with a code from a teammate.
@@ -41,8 +41,12 @@ export default async function TeamPage() {
             </p>
 
             <div className="mt-8 divide-y divide-border rounded-lg border border-border bg-card">
-                {profile.team.members.map((m) => (
-                    <div key={m.id} className="flex items-center gap-3 px-4 py-3">
+                {profile.team.members.map((m, i) => (
+                    <div
+                        key={m.id}
+                        style={{ animationDelay: `${i * 55}ms` }}
+                        className="animate-rise flex items-center gap-3 px-4 py-3"
+                    >
                         <Avatar name={m.name} />
                         <div>
                             <p className="text-sm font-medium text-foreground">

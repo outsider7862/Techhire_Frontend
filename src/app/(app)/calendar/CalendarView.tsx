@@ -150,7 +150,7 @@ export default function CalendarView() {
                 </button>
             </div>
 
-            <div className="rounded-lg border border-border bg-card p-3">
+            <div className="animate-rise rounded-lg border border-border bg-card p-3">
                 <FullCalendar
                     ref={calendarRef}
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}

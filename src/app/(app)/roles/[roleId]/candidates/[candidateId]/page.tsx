@@ -47,7 +47,7 @@ export default async function CandidatePage({
     const upcomingEvents = candidate.events.filter((e) => e.startTime >= new Date());
 
     return (
-        <main className="mx-auto max-w-3xl px-6 py-16">
+        <main className="animate-rise mx-auto max-w-3xl px-6 py-16">
             <Breadcrumbs
                 items={[
                     { label: "Roles", href: "/roles" },

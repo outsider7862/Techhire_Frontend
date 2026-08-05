@@ -115,8 +115,8 @@ export default function EventModal({
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-            <div className="w-full max-w-md rounded-lg border border-border bg-card p-5 shadow-xl">
+        <div className="animate-fade fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div className="animate-rise w-full max-w-md rounded-lg border border-border bg-card p-5 shadow-xl">
                 <h2 className="text-lg font-semibold text-foreground">
                     {state.mode === "create" ? "New event" : "Edit event"}
                 </h2>

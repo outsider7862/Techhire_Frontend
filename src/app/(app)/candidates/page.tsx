@@ -170,8 +170,12 @@ export default function CandidatesSearchPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {results.map((c) => (
-                                    <tr key={c.id} className="border-b border-border last:border-0 hover:bg-muted/30">
+                                {results.map((c, i) => (
+                                    <tr
+                                        key={c.id}
+                                        style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}
+                                        className="animate-rise border-b border-border last:border-0 hover:bg-muted/30"
+                                    >
                                         <td className="px-4 py-3">
                                             <Link
                                                 href={`/roles/${c.roleId}/candidates/${c.id}`}
