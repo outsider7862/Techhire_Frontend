@@ -39,11 +39,12 @@ export default async function RolesIndexPage() {
                         No roles yet. Create one to start uploading resumes against it.
                     </div>
                 )}
-                {roles.map((role) => (
+                {roles.map((role, i) => (
                     <Link
                         key={role.id}
                         href={`/roles/${role.id}`}
-                        className="flex items-center justify-between rounded-lg border border-border bg-card px-5 py-4 transition-colors hover:border-primary/30 hover:bg-muted/40"
+                        style={{ animationDelay: `${i * 60}ms` }}
+                        className="animate-rise hover-lift flex items-center justify-between rounded-lg border border-border bg-card px-5 py-4 hover:border-accent/40"
                     >
                         <div>
                             <p className="font-medium text-foreground">{role.title}</p>

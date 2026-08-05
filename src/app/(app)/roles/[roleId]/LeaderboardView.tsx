@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { getCandidateDisplayName } from "@/lib/displayName";
+import CountUp from "@/components/CountUp";
 
 type Candidate = {
   id: string;
@@ -67,10 +68,22 @@ export default function LeaderboardView({
 
       <ol className="mt-4 space-y-3">
         {scored.map((c, i) => (
-          <li key={c.id} className="rounded-lg border border-border bg-card p-4">
+          <li
+            key={c.id}
+            style={{ animationDelay: `${i * 70}ms` }}
+            className={`animate-rise hover-lift rounded-lg border bg-card p-4 ${i === 0 ? "border-accent/50 ring-1 ring-accent/30" : "border-border"
+              }`}
+          >
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-baseline gap-3">
-                <span className="font-mono text-sm text-muted-foreground">#{i + 1}</span>
+                <span
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-mono text-xs font-semibold ${i === 0
+                    ? "bg-accent text-accent-foreground shadow-sm"
+                    : "bg-muted text-muted-foreground"
+                    }`}
+                >
+                  {i + 1}
+                </span>
                 <Link
                   href={`/roles/${roleId}/candidates/${c.id}`}
                   className="font-medium text-foreground underline-offset-2 hover:underline"
@@ -78,13 +91,17 @@ export default function LeaderboardView({
                   {getCandidateDisplayName(c)}
                 </Link>
               </div>
-              <span className="font-mono text-lg font-semibold text-foreground">{c.score}</span>
+              <CountUp
+                value={c.score ?? 0}
+                className={`font-mono text-2xl font-semibold tabular-nums ${i === 0 ? "text-accent" : "text-foreground"
+                  }`}
+              />
             </div>
             <p className="mt-1 text-sm text-muted-foreground">{c.skills.slice(0, 6).join(", ")}</p>
             <p className="mt-2 text-sm text-foreground">{c.scoreReasoning}</p>
             {comparisons[c.id] && (
-              <p className="mt-2 rounded-md bg-primary/5 px-3 py-2 text-sm text-foreground">
-                <span className="font-medium text-primary">Vs. the field: </span>
+              <p className="mt-2 rounded-md bg-accent/5 px-3 py-2 text-sm text-foreground">
+                <span className="font-medium text-accent">Vs. the field: </span>
                 {comparisons[c.id]}
               </p>
             )}

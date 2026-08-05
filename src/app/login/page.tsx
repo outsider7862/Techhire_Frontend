@@ -31,7 +31,13 @@ export default function LoginPage() {
     }
 
     return (
-        <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
+        <main className="animate-rise mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
+            <div className="mb-4 flex items-center gap-2.5">
+                <span className="flex h-8 w-8 items-center justify-center rounded-md bg-accent text-sm font-bold text-accent-foreground shadow-sm">
+                    TH
+                </span>
+                <span className="font-semibold text-foreground">TechHire</span>
+            </div>
             <h1 className="text-xl font-semibold text-foreground">Sign in</h1>
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 <input

@@ -1,24 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  /* TechHire Copilot design system — Data-Dense Dashboard palette,
-     generated via the ui-ux-pro-max skill. */
-  --background: #F8FAFC;
-  --foreground: #1E3A8A;
+  /* TechHire Copilot — "Premium Mono + Gold" palette.
+     Warm near-black + stone neutrals with a single gold accent. */
+  --background: #FAFAF9;
+  --foreground: #1C1917;
   --card: #FFFFFF;
-  --card-foreground: #1E3A8A;
-  --primary: #1E40AF;
-  --primary-foreground: #FFFFFF;
-  --secondary: #3B82F6;
+  --card-foreground: #1C1917;
+  --primary: #1C1917;
+  --primary-foreground: #FAFAF9;
+  --secondary: #57534E;
   --secondary-foreground: #FFFFFF;
-  --accent: #D97706;
+  --accent: #A16207;
   --accent-foreground: #FFFFFF;
-  --muted: #E9EEF6;
-  --muted-foreground: #64748B;
-  --border: #DBEAFE;
-  --destructive: #DC2626;
+  --muted: #F5F5F4;
+  --muted-foreground: #78716C;
+  --border: #E7E5E4;
+  --destructive: #B91C1C;
   --destructive-foreground: #FFFFFF;
-  --ring: #1E40AF;
+  --ring: #A16207;
 }
 
 @theme inline {
@@ -38,32 +38,198 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-ring: var(--ring);
-  --font-sans: var(--font-fira-sans);
-  --font-mono: var(--font-fira-code);
+  --font-sans: var(--font-sans-src);
+  --font-mono: var(--font-mono-src);
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 .dark {
-  --background: #0B1220;
-  --foreground: #E2E8F0;
-  --card: #111827;
-  --card-foreground: #E2E8F0;
-  --primary: #3B82F6;
-  --primary-foreground: #0B1220;
-  --secondary: #60A5FA;
-  --secondary-foreground: #0B1220;
-  --accent: #F59E0B;
-  --accent-foreground: #0B1220;
-  --muted: #1E293B;
-  --muted-foreground: #94A3B8;
-  --border: #1E293B;
+  /* Warm dark: stone-950 base, light primary so buttons read on dark,
+     brighter gold accent for contrast. */
+  --background: #0C0A09;
+  --foreground: #FAFAF9;
+  --card: #1C1917;
+  --card-foreground: #FAFAF9;
+  --primary: #FAFAF9;
+  --primary-foreground: #1C1917;
+  --secondary: #A8A29E;
+  --secondary-foreground: #1C1917;
+  --accent: #E0A82E;
+  --accent-foreground: #1C1917;
+  --muted: #292524;
+  --muted-foreground: #A8A29E;
+  --border: #292524;
   --destructive: #F87171;
-  --destructive-foreground: #0B1220;
-  --ring: #3B82F6;
+  --destructive-foreground: #1C1917;
+  --ring: #E0A82E;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* --- Global interaction polish ------------------------------------------ */
+
+/* Smooth, scoped transitions on the things people actually touch. */
+a,
+button,
+input,
+select,
+textarea,
+[role="button"],
+summary {
+  transition: color 160ms ease, background-color 160ms ease,
+    border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease,
+    opacity 160ms ease;
+}
+
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+a[href],
+summary,
+label[for] {
+  cursor: pointer;
+}
+
+/* Tactile press feedback on any button (the "lively" spec). */
+button:not(:disabled):active,
+[role="button"]:not([aria-disabled="true"]):active {
+  transform: scale(0.97);
+}
+
+/* Gold focus ring, keyboard-only. */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+/* Subtle, on-brand scrollbar. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+  border: 3px solid var(--background);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* --- Motion utilities ---------------------------------------------------- */
+
+@keyframes th-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes th-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes th-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes th-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Springy entrance (back.out-style overshoot), used app-wide for reveals. */
+.animate-rise {
+  opacity: 0;
+  animation: th-rise 480ms cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+.animate-fade {
+  opacity: 0;
+  animation: th-fade 400ms ease both;
+}
+.animate-slide-in {
+  opacity: 0;
+  animation: th-slide-in 420ms cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+/* Pronounced hover-lift for cards/rows (the "lively" spec). */
+.hover-lift {
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 200ms ease, border-color 160ms ease;
+  will-change: transform;
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -12px color-mix(in srgb, var(--foreground) 22%, transparent);
+}
+
+/* Skeleton shimmer for loading states. */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--foreground) 8%, transparent),
+    transparent
+  );
+  animation: th-shimmer 1.5s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-rise,
+  .animate-fade,
+  .animate-slide-in {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  button:not(:disabled):active {
+    transform: none;
+  }
 }

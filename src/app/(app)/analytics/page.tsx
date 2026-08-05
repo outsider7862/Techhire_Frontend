@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/lib/prisma";
 import AnalyticsCharts from "./AnalyticsCharts";
+import CountUp from "@/components/CountUp";
 
 const STAGES = ["APPLIED", "SCREENING", "INTERVIEW", "OFFER", "REJECTED", "HIRED"] as const;
 
@@ -70,22 +71,24 @@ export default async function AnalyticsPage() {
             </p>
 
             <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <StatCard label="Roles" value={roleCount} />
-                <StatCard label="Candidates" value={totalCandidates} />
+                <StatCard label="Roles" value={roleCount} delay={0} />
+                <StatCard label="Candidates" value={totalCandidates} delay={60} />
                 <StatCard
                     label="Avg. score"
                     value={avgScoreResult._avg.score ? Math.round(avgScoreResult._avg.score) : "—"}
+                    delay={120}
                 />
                 <StatCard
                     label="Avg. time to score"
                     value={avgScoreTimeMs !== null ? formatDuration(avgScoreTimeMs) : "—"}
+                    delay={180}
                 />
             </div>
 
             <div className="mt-6 grid grid-cols-3 gap-4">
-                <StatCard label="Scored" value={statusMap.SCORED ?? 0} />
-                <StatCard label="Pending" value={statusMap.PENDING ?? 0} />
-                <StatCard label="Failed to parse" value={statusMap.FAILED ?? 0} />
+                <StatCard label="Scored" value={statusMap.SCORED ?? 0} delay={240} />
+                <StatCard label="Pending" value={statusMap.PENDING ?? 0} delay={300} />
+                <StatCard label="Failed to parse" value={statusMap.FAILED ?? 0} delay={360} />
             </div>
 
             <AnalyticsCharts stageData={stageData} roleData={roleData} />
@@ -93,11 +96,24 @@ export default async function AnalyticsPage() {
     );
 }
 
-function StatCard({ label, value }: { label: string; value: string | number }) {
+function StatCard({
+    label,
+    value,
+    delay = 0,
+}: {
+    label: string;
+    value: string | number;
+    delay?: number;
+}) {
     return (
-        <div className="rounded-lg border border-border bg-card p-4">
+        <div
+            style={{ animationDelay: `${delay}ms` }}
+            className="animate-rise hover-lift rounded-lg border border-border bg-card p-4"
+        >
             <p className="text-xs text-muted-foreground">{label}</p>
-            <p className="mt-1 font-mono text-2xl font-semibold text-foreground">{value}</p>
+            <p className="mt-1 font-mono text-2xl font-semibold tabular-nums text-foreground">
+                {typeof value === "number" ? <CountUp value={value} /> : value}
+            </p>
         </div>
     );
 }

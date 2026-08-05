@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { Fira_Sans, Fira_Code } from "next/font/google";
+import { DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeScript from "@/components/ThemeScript";
 
-const firaSans = Fira_Sans({
-  variable: "--font-fira-sans",
+const sans = DM_Sans({
+  variable: "--font-sans-src",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const firaCode = Fira_Code({
-  variable: "--font-fira-code",
+const mono = JetBrains_Mono({
+  variable: "--font-mono-src",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
 });
@@ -32,7 +32,7 @@ export default function RootLayout({
       // client class list intentionally differs from the server's. Scope the
       // hydration warning suppression to this one element only.
       suppressHydrationWarning
-      className={`${firaSans.variable} ${firaCode.variable} h-full antialiased`}
+      className={`${sans.variable} ${mono.variable} h-full antialiased`}
     >
       <head>
         <ThemeScript />
