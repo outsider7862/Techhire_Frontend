@@ -29,7 +29,7 @@ function NavLink({
             href={href}
             style={style}
             className={`animate-slide-in group relative block rounded-md px-3 py-2 text-sm font-medium ${active
-                ? "bg-accent/10 text-accent"
+                ? "bg-accent/10 text-foreground"
                 : "text-muted-foreground hover:translate-x-0.5 hover:bg-muted hover:text-foreground"
                 }`}
         >
