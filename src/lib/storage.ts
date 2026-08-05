@@ -42,3 +42,17 @@ export async function createSignedReadUrl(path: string, expiresInSeconds = 3600)
   if (error) throw error;
   return data.signedUrl;
 }
+
+/**
+ * Best-effort removal of a stored resume file (e.g. when a candidate is
+ * deleted). Deliberately swallows errors — an orphaned object shouldn't
+ * block the database delete that actually matters.
+ */
+export async function deleteStoredFile(path: string) {
+  if (!path) return;
+  try {
+    await supabase.storage.from(RESUME_BUCKET).remove([path]);
+  } catch {
+    // ignore — cleanup only
+  }
+}

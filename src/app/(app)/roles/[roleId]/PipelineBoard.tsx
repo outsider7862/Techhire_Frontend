@@ -78,9 +78,11 @@ function CardBody({ candidate }: { candidate: Candidate }) {
 function DraggableCard({
     candidate,
     roleId,
+    onDelete,
 }: {
     candidate: Candidate;
     roleId: string;
+    onDelete: (id: string) => void;
 }) {
     const router = useRouter();
     const { attributes, listeners, setNodeRef, transform, isDragging } =
@@ -104,9 +106,34 @@ function DraggableCard({
                     router.push(`/roles/${roleId}/candidates/${candidate.id}`);
                 }
             }}
-            className={`cursor-pointer rounded-md border border-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md ${isDragging ? "opacity-50" : ""
+            className={`group relative cursor-pointer rounded-md border border-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md ${isDragging ? "opacity-50" : ""
                 }`}
         >
+            {/* stopPropagation so deleting doesn't start a drag or open the card */}
+            <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(candidate.id);
+                }}
+                aria-label="Delete candidate"
+                className="absolute right-1.5 top-1.5 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+            >
+                <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                >
+                    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                    <path d="M10 11v6M14 11v6" />
+                </svg>
+            </button>
             <CardBody candidate={candidate} />
         </div>
     );
@@ -116,10 +143,12 @@ function Column({
     stage,
     candidates,
     roleId,
+    onDelete,
 }: {
     stage: string;
     candidates: Candidate[];
     roleId: string;
+    onDelete: (id: string) => void;
 }) {
     const { setNodeRef, isOver } = useDroppable({ id: stage });
 
@@ -139,7 +168,7 @@ function Column({
             </div>
             <div className="flex min-h-16 flex-col gap-2">
                 {candidates.map((c) => (
-                    <DraggableCard key={c.id} candidate={c} roleId={roleId} />
+                    <DraggableCard key={c.id} candidate={c} roleId={roleId} onDelete={onDelete} />
                 ))}
             </div>
         </div>
@@ -195,6 +224,26 @@ export default function PipelineBoard({
         }
     }
 
+    async function handleDelete(candidateId: string) {
+        if (
+            !confirm(
+                "Delete this candidate? Their resume, notes, and scheduled interviews are removed too. This can't be undone."
+            )
+        ) {
+            return;
+        }
+        const previous = candidates;
+        setCandidates((prev) => prev.filter((c) => c.id !== candidateId));
+        try {
+            const res = await fetch(`/api/candidates/${candidateId}`, { method: "DELETE" });
+            if (!res.ok) throw new Error();
+            router.refresh();
+        } catch {
+            setCandidates(previous);
+            alert("Couldn't delete the candidate — please try again.");
+        }
+    }
+
     const activeCandidate = candidates.find((c) => c.id === activeId);
 
     return (
@@ -210,6 +259,7 @@ export default function PipelineBoard({
                         stage={stage}
                         candidates={candidates.filter((c) => c.stage === stage)}
                         roleId={roleId}
+                        onDelete={handleDelete}
                     />
                 ))}
             </div>

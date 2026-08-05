@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import NotesSection from "./NotesSection";
 import EmailDraftPanel from "./EmailDraftPanel";
 import ViewResumeButton from "./ViewResumeButton";
+import DeleteCandidateButton from "./DeleteCandidateButton";
 import StageSelect from "../../StageSelect";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getCandidateDisplayName } from "@/lib/displayName";
@@ -76,6 +77,7 @@ export default async function CandidatePage({
                 <div className="flex items-center gap-2">
                     <ViewResumeButton candidateId={candidate.id} />
                     <StageSelect candidateId={candidate.id} currentStage={candidate.stage} />
+                    <DeleteCandidateButton candidateId={candidate.id} roleId={roleId} />
                 </div>
             </div>
 
