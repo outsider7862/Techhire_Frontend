@@ -120,6 +120,16 @@ function useCollapsed(): [boolean, () => void] {
     return [collapsed, toggle];
 }
 
+/* --- Collapsed hover flyout --------------------------------------------- */
+
+function Flyout({ label }: { label: string }) {
+    return (
+        <span className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 translate-x-1 whitespace-nowrap rounded-md border border-border bg-card px-2 py-1 text-xs font-medium text-foreground opacity-0 shadow-md transition-all duration-150 group-hover:translate-x-0 group-hover:opacity-100">
+            {label}
+        </span>
+    );
+}
+
 /* --- Nav link ----------------------------------------------------------- */
 
 function NavLink({
@@ -140,9 +150,9 @@ function NavLink({
     return (
         <Link
             href={href}
-            title={collapsed ? label : undefined}
+            aria-label={collapsed ? label : undefined}
             style={style}
-            className={`animate-slide-in relative flex items-center rounded-md py-2 text-sm font-medium ${collapsed ? "justify-center px-2" : "gap-3 px-3"
+            className={`animate-slide-in group relative flex items-center rounded-md py-2 text-sm font-medium ${collapsed ? "justify-center px-2" : "gap-3 px-3"
                 } ${active
                     ? "bg-accent/10 text-foreground"
                     : "text-muted-foreground hover:translate-x-0.5 hover:bg-muted hover:text-foreground"
@@ -154,6 +164,7 @@ function NavLink({
             />
             <Icon name={icon} />
             {!collapsed && <span className="animate-fade">{label}</span>}
+            {collapsed && <Flyout label={label} />}
         </Link>
     );
 }
@@ -252,12 +263,13 @@ export default function Sidebar({ userName }: { userName: string }) {
                 />
                 <button
                     onClick={handleSignOut}
-                    title={collapsed ? "Sign out" : undefined}
-                    className={`mt-1 flex w-full items-center rounded-md py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground ${collapsed ? "justify-center px-2" : "gap-3 px-3"
+                    aria-label={collapsed ? "Sign out" : undefined}
+                    className={`group relative mt-1 flex w-full items-center rounded-md py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground ${collapsed ? "justify-center px-2" : "gap-3 px-3"
                         }`}
                 >
                     <Icon name="signout" />
                     {!collapsed && <span className="animate-fade">Sign out</span>}
+                    {collapsed && <Flyout label="Sign out" />}
                 </button>
             </div>
         </aside>
