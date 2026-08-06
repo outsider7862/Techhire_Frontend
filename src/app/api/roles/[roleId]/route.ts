@@ -15,7 +15,11 @@ export async function GET(
   const { role, error: roleError } = await getRoleForTeam(roleId, teamId);
   if (roleError) return roleError;
 
-  return NextResponse.json(role);
+  const scoredCandidateCount = await prisma.candidate.count({
+    where: { roleId, status: "SCORED" },
+  });
+
+  return NextResponse.json({ ...role, scoredCandidateCount });
 }
 
 export async function PATCH(

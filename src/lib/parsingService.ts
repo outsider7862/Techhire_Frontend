@@ -21,6 +21,42 @@ interface CandidateFileRef {
   file_name: string;
 }
 
+interface ParsedProfile {
+  name: string;
+  email: string;
+  phone: string;
+  skills: string[];
+  years_experience: number;
+  tech_stack: string[];
+  summary: string;
+}
+
+/**
+ * Re-score an already-parsed candidate against (possibly updated) role
+ * requirements. Reuses the stored profile — no file fetch, no re-parse.
+ */
+export async function scoreOne(params: {
+  parsed: ParsedProfile;
+  role: RoleRequirements;
+}): Promise<{ score: number; reasoning: string }> {
+  const res = await fetch(`${PARSING_SERVICE_URL}/score`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(PARSING_SERVICE_TOKEN
+        ? { Authorization: `Bearer ${PARSING_SERVICE_TOKEN}` }
+        : {}),
+    },
+    body: JSON.stringify({ parsed: params.parsed, role: params.role }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Parsing service rejected score: ${res.status}`);
+  }
+
+  return res.json();
+}
+
 export async function startBatch(params: {
   batchId: string;
   role: RoleRequirements;

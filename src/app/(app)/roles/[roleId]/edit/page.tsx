@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useToast } from "@/components/ui/toast";
@@ -20,6 +20,12 @@ export default function EditRolePage() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
+    // Snapshot of the scoring-relevant fields as loaded, plus how many
+    // candidates are already scored — used to decide whether to offer a
+    // re-score after the user saves.
+    const initialRef = useRef({ skills: "", minYears: 0, skillsWeight: 50, description: "" });
+    const scoredCountRef = useRef(0);
+
     useEffect(() => {
         fetch(`/api/roles/${params.roleId}`)
             .then((res) => res.json())
@@ -29,6 +35,13 @@ export default function EditRolePage() {
                 setSkills(role.requiredSkills.join(", "));
                 setMinYears(role.minYearsExperience);
                 setSkillsWeight(role.skillsWeight ?? 50);
+                initialRef.current = {
+                    skills: role.requiredSkills.join("|"),
+                    minYears: role.minYearsExperience,
+                    skillsWeight: role.skillsWeight ?? 50,
+                    description: role.description ?? "",
+                };
+                scoredCountRef.current = role.scoredCandidateCount ?? 0;
                 setLoading(false);
             });
     }, [params.roleId]);
@@ -37,6 +50,11 @@ export default function EditRolePage() {
         e.preventDefault();
         setSubmitting(true);
 
+        const requiredSkills = skills
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+
         try {
             const res = await fetch(`/api/roles/${params.roleId}`, {
                 method: "PATCH",
@@ -44,16 +62,47 @@ export default function EditRolePage() {
                 body: JSON.stringify({
                     title,
                     description,
-                    requiredSkills: skills
-                        .split(",")
-                        .map((s) => s.trim())
-                        .filter(Boolean),
+                    requiredSkills,
                     minYearsExperience: minYears,
                     skillsWeight,
                 }),
             });
             if (!res.ok) throw new Error("Failed to save role");
             toast.success("Role updated.");
+
+            // If anything the scorer actually reads has changed, offer to
+            // re-score the candidates that were scored under the old criteria.
+            const init = initialRef.current;
+            const scoringChanged =
+                (description ?? "") !== init.description ||
+                minYears !== init.minYears ||
+                skillsWeight !== init.skillsWeight ||
+                requiredSkills.join("|") !== init.skills;
+
+            if (scoringChanged && scoredCountRef.current > 0) {
+                const n = scoredCountRef.current;
+                const ok = await confirm({
+                    title: "Re-score candidates?",
+                    body: `This role's requirements changed. Re-score its ${n} scored candidate${n === 1 ? "" : "s"} against the new criteria? This runs the AI scorer again.`,
+                    confirmText: "Re-score",
+                    cancelText: "Skip",
+                });
+                if (ok) {
+                    try {
+                        const r = await fetch(`/api/roles/${params.roleId}/rescore`, {
+                            method: "POST",
+                        });
+                        if (!r.ok) throw new Error("rescore failed");
+                        const { rescored } = await r.json();
+                        toast.success(
+                            `Re-scored ${rescored} candidate${rescored === 1 ? "" : "s"}.`
+                        );
+                    } catch {
+                        toast.error("Couldn't re-score candidates — try again from the role page.");
+                    }
+                }
+            }
+
             router.push(`/roles/${params.roleId}`);
             router.refresh();
         } catch {
