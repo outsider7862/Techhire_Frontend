@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useToast } from "@/components/ui/toast";
+import Select from "@/components/ui/Select";
 
 const STAGES = [
   "APPLIED",
@@ -47,17 +48,12 @@ export default function StageSelect({
   }
 
   return (
-    <select
-      value={stage}
-      disabled={saving}
-      onChange={(e) => handleChange(e.target.value)}
-      className="rounded-md border border-border bg-card px-2.5 py-1.5 text-xs text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
-    >
+    <Select value={stage} disabled={saving} onChange={(e) => handleChange(e.target.value)}>
       {STAGES.map((s) => (
         <option key={s} value={s}>
           {s.charAt(0) + s.slice(1).toLowerCase()}
         </option>
       ))}
-    </select>
+    </Select>
   );
 }

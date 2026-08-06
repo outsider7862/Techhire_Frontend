@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
+import PasswordInput from "@/components/ui/PasswordInput";
 
 export default function SignupPage() {
     const [name, setName] = useState("");
@@ -72,8 +73,7 @@ export default function SignupPage() {
                     placeholder="Email"
                     className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground"
                 />
-                <input
-                    type="password"
+                <PasswordInput
                     required
                     minLength={8}
                     value={password}

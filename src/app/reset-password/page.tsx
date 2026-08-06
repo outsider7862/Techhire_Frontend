@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import PasswordInput from "@/components/ui/PasswordInput";
 
 export default function ResetPasswordPage() {
     const router = useRouter();
@@ -32,8 +33,7 @@ export default function ResetPasswordPage() {
         <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
             <h1 className="text-xl font-semibold text-foreground">Set a new password</h1>
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-                <input
-                    type="password"
+                <PasswordInput
                     required
                     minLength={8}
                     value={password}

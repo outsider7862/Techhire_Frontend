@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getCandidateDisplayName } from "@/lib/displayName";
 import { useToast } from "@/components/ui/toast";
 import { useConfirm } from "@/components/ui/confirm";
+import Select from "@/components/ui/Select";
 
 type Candidate = { id: string; fileName: string; name: string | null; role: { title: string } };
 
@@ -158,10 +159,10 @@ export default function EventModal({
                                 className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
                             />
                         </div>
-                        <select
+                        <Select
                             value={candidateId}
                             onChange={(e) => setCandidateId(e.target.value)}
-                            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                            className="w-full"
                         >
                             <option value="">Select a candidate…</option>
                             {candidates.map((c) => (
@@ -169,7 +170,7 @@ export default function EventModal({
                                     {getCandidateDisplayName(c)} — {c.role.title}
                                 </option>
                             ))}
-                        </select>
+                        </Select>
                         <textarea
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}

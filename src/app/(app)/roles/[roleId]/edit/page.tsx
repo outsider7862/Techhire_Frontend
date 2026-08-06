@@ -6,6 +6,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { useToast } from "@/components/ui/toast";
 import { useConfirm } from "@/components/ui/confirm";
 import ScoringEmphasisSlider from "@/components/ScoringEmphasisSlider";
+import NumberStepper from "@/components/ui/NumberStepper";
 
 export default function EditRolePage() {
     const router = useRouter();
@@ -177,13 +178,14 @@ export default function EditRolePage() {
                     <label className="block text-sm font-medium text-foreground">
                         Minimum years of experience
                     </label>
-                    <input
-                        type="number"
-                        min={0}
-                        value={minYears}
-                        onChange={(e) => setMinYears(Number(e.target.value))}
-                        className="mt-1 w-32 rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground"
-                    />
+                    <div className="mt-1.5">
+                        <NumberStepper
+                            value={minYears}
+                            onChange={setMinYears}
+                            min={0}
+                            aria-label="Minimum years of experience"
+                        />
+                    </div>
                 </div>
                 <ScoringEmphasisSlider value={skillsWeight} onChange={setSkillsWeight} />
                 <div className="flex items-center gap-3">

@@ -6,6 +6,7 @@ import { createClient } from "@/utils/supabase/client";
 import Avatar from "@/components/Avatar";
 import { useToast } from "@/components/ui/toast";
 import { useConfirm } from "@/components/ui/confirm";
+import PasswordInput from "@/components/ui/PasswordInput";
 
 type Profile = { id: string; name: string; email: string; createdAt: string | Date };
 
@@ -122,16 +123,14 @@ export default function ProfileForm({ user }: { user: Profile }) {
             <section className="rounded-lg border border-border bg-card p-4">
                 <h2 className="text-sm font-medium text-muted-foreground">Change password</h2>
                 <form onSubmit={handleChangePassword} className="mt-3 space-y-3">
-                    <input
-                        type="password"
+                    <PasswordInput
                         required
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         placeholder="Current password"
                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
                     />
-                    <input
-                        type="password"
+                    <PasswordInput
                         required
                         minLength={8}
                         value={newPassword}

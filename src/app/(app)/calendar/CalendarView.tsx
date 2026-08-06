@@ -16,6 +16,7 @@ import type { EventResizeDoneArg } from "@fullcalendar/interaction";
 import EventModal from "./EventModal";
 import { useToast } from "@/components/ui/toast";
 import { useConfirm } from "@/components/ui/confirm";
+import Select from "@/components/ui/Select";
 
 type ModalState =
     | { mode: "create"; start: Date; end: Date; candidateId?: string }
@@ -141,15 +142,14 @@ export default function CalendarView() {
         <div>
             <div className="mb-4 flex flex-wrap items-center gap-2">
                 <label className="text-sm text-muted-foreground">Find next available:</label>
-                <select
+                <Select
                     value={duration}
                     onChange={(e) => setDuration(Number(e.target.value))}
-                    className="rounded-md border border-border bg-card px-2 py-1.5 text-sm text-foreground"
                 >
                     <option value={30}>30 min</option>
                     <option value={60}>60 min</option>
                     <option value={90}>90 min</option>
-                </select>
+                </Select>
                 <button
                     onClick={handleFindSlot}
                     className="rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted"
@@ -158,7 +158,7 @@ export default function CalendarView() {
                 </button>
             </div>
 
-            <div className="animate-rise rounded-lg border border-border bg-card p-3">
+            <div className="th-calendar animate-rise rounded-lg border border-border bg-card p-3">
                 <FullCalendar
                     ref={calendarRef}
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useToast } from "@/components/ui/toast";
+import Select from "@/components/ui/Select";
 
 type Draft = { subject: string; body: string };
 type EmailType = "interview_invite" | "rejection" | "status_update" | "offer";
@@ -72,17 +73,16 @@ export default function EmailDraftPanel({
             )}
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-                <select
+                <Select
                     value={emailType}
                     onChange={(e) => setEmailType(e.target.value as EmailType)}
-                    className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm text-foreground"
                 >
                     {EMAIL_TYPES.map((t) => (
                         <option key={t.value} value={t.value}>
                             {t.label}
                         </option>
                     ))}
-                </select>
+                </Select>
                 <button
                     onClick={() => generate(false)}
                     disabled={loading}

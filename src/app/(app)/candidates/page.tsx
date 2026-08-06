@@ -3,6 +3,7 @@ import { getCandidateDisplayName } from "@/lib/displayName";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/toast";
+import Select from "@/components/ui/Select";
 
 type Candidate = {
     id: string;
@@ -124,10 +125,10 @@ export default function CandidatesSearchPage() {
                     placeholder="Min years"
                     className="rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground"
                 />
-                <select
+                <Select
                     value={roleId}
                     onChange={(e) => setRoleId(e.target.value)}
-                    className="rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground"
+                    className="w-full"
                 >
                     <option value="">All roles</option>
                     {roles.map((r) => (
@@ -135,7 +136,7 @@ export default function CandidatesSearchPage() {
                             {r.title}
                         </option>
                     ))}
-                </select>
+                </Select>
             </div>
 
             <div className="mt-3 flex flex-wrap gap-2">

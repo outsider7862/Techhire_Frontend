@@ -19,6 +19,8 @@
   --destructive: #B91C1C;
   --destructive-foreground: #FFFFFF;
   --ring: #CA8A04;
+  /* Make native controls (select popups, date pickers, spinners) match. */
+  color-scheme: light;
 }
 
 @theme inline {
@@ -63,6 +65,7 @@
   --destructive: #F87171;
   --destructive-foreground: #1C1917;
   --ring: #FACC15;
+  color-scheme: dark;
 }
 
 body {
@@ -212,6 +215,123 @@ button:not(:disabled):active,
     transparent
   );
   animation: th-shimmer 1.5s infinite;
+}
+
+/* Hide the native number-input spinners app-wide — steppers and clean typed
+   fields replace them, and the OS spinners never matched the theme. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* --- FullCalendar theming ------------------------------------------------ */
+/* FullCalendar ships its own default look (light, blue events, thick default
+   buttons) and injects that CSS at runtime. Everything here is scoped under
+   .th-calendar (the wrapper) so it out-specifies those defaults regardless of
+   injection order, mapping FC's variables to our tokens and restyling the
+   toolbar so the calendar reads as part of the app in light and dark. */
+.th-calendar .fc {
+  --fc-border-color: var(--border);
+  --fc-page-bg-color: var(--card);
+  --fc-neutral-bg-color: var(--muted);
+  --fc-today-bg-color: color-mix(in srgb, var(--accent) 10%, transparent);
+  --fc-now-indicator-color: var(--accent);
+  --fc-event-bg-color: var(--accent);
+  --fc-event-border-color: var(--accent);
+  --fc-event-text-color: var(--accent-foreground);
+  --fc-highlight-color: color-mix(in srgb, var(--accent) 14%, transparent);
+  font-family: inherit;
+}
+
+/* Toolbar */
+.th-calendar .fc .fc-toolbar-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+/* Buttons (prev/next/today + view switcher) */
+.th-calendar .fc .fc-button-primary {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--foreground);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  box-shadow: none;
+  padding: 0.35rem 0.7rem;
+}
+.th-calendar .fc .fc-button-primary:hover {
+  background: var(--muted);
+  border-color: var(--border);
+  color: var(--foreground);
+}
+.th-calendar .fc .fc-button-primary:disabled {
+  background: var(--muted);
+  border-color: var(--border);
+  color: var(--muted-foreground);
+  opacity: 1;
+}
+.th-calendar .fc .fc-button-primary:not(:disabled).fc-button-active,
+.th-calendar .fc .fc-button-primary:not(:disabled):active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-foreground);
+}
+.th-calendar .fc .fc-button-primary:focus {
+  box-shadow: none;
+}
+.th-calendar .fc .fc-button-primary:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Column headers (Sun, Mon, …) */
+.th-calendar .fc .fc-col-header-cell-cushion {
+  display: inline-block;
+  padding: 0.5rem 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+}
+
+/* Day cells + time-grid labels */
+.th-calendar .fc .fc-daygrid-day-number,
+.th-calendar .fc .fc-timegrid-slot-label-cushion,
+.th-calendar .fc .fc-timegrid-axis-cushion,
+.th-calendar .fc .fc-list-day-text {
+  color: var(--foreground);
+  text-decoration: none;
+}
+.th-calendar .fc .fc-daygrid-day-number {
+  padding: 0.4rem 0.5rem;
+  font-size: 0.8rem;
+}
+.th-calendar .fc .fc-day-other .fc-daygrid-day-top {
+  opacity: 0.35;
+}
+
+/* Events */
+.th-calendar .fc .fc-daygrid-event,
+.th-calendar .fc .fc-timegrid-event {
+  border-radius: 5px;
+  padding: 1px 4px;
+  font-weight: 500;
+}
+.th-calendar .fc .fc-event:hover {
+  filter: brightness(0.95);
+}
+
+/* Links (title, "+n more") shouldn't inherit FC's default blue */
+.th-calendar .fc a {
+  color: inherit;
 }
 
 @media (prefers-reduced-motion: reduce) {
