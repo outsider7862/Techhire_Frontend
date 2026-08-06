@@ -12,6 +12,7 @@ interface RoleRequirements {
   required_skills: string[];
   min_years_experience: number;
   description: string;
+  skills_weight: number;
 }
 
 interface CandidateFileRef {

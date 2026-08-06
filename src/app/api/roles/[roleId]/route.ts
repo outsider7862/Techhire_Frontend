@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireTeam } from "@/lib/requireTeam";
 import { getRoleForTeam } from "@/lib/teamScoped";
+import { clampWeight } from "@/lib/roleWeight";
 
 export async function GET(
   _req: NextRequest,
@@ -29,7 +30,7 @@ export async function PATCH(
   if (roleError) return roleError;
 
   const body = await req.json();
-  const { title, description, requiredSkills, minYearsExperience } = body;
+  const { title, description, requiredSkills, minYearsExperience, skillsWeight } = body;
 
   const role = await prisma.role.update({
     where: { id: roleId },
@@ -38,6 +39,7 @@ export async function PATCH(
       ...(description !== undefined ? { description } : {}),
       ...(requiredSkills !== undefined ? { requiredSkills } : {}),
       ...(minYearsExperience !== undefined ? { minYearsExperience } : {}),
+      ...(skillsWeight !== undefined ? { skillsWeight: clampWeight(skillsWeight) } : {}),
     },
   });
 

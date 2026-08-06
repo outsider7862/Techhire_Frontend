@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useToast } from "@/components/ui/toast";
+import ScoringEmphasisSlider from "@/components/ScoringEmphasisSlider";
 
 export default function NewRolePage() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function NewRolePage() {
   const [description, setDescription] = useState("");
   const [skills, setSkills] = useState("");
   const [minYears, setMinYears] = useState(0);
+  const [skillsWeight, setSkillsWeight] = useState(50);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -30,6 +32,7 @@ export default function NewRolePage() {
             .map((s) => s.trim())
             .filter(Boolean),
           minYearsExperience: minYears,
+          skillsWeight,
         }),
       });
       if (!res.ok) throw new Error("Failed to create role");
@@ -94,6 +97,7 @@ export default function NewRolePage() {
             className="mt-1 w-32 rounded-md border border-border px-3 py-2 text-sm"
           />
         </div>
+        <ScoringEmphasisSlider value={skillsWeight} onChange={setSkillsWeight} />
         <button
           type="submit"
           disabled={submitting}

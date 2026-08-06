@@ -36,6 +36,9 @@ model Role {
   description        String      @default("")
   requiredSkills     String[]
   minYearsExperience Int         @default(0)
+  // 0 = weight experience/depth entirely, 100 = weight skill overlap entirely,
+  // 50 = balanced. Passed to the AI scorer to bias each candidate's score.
+  skillsWeight       Int         @default(50)
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
   candidates         Candidate[]

@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useToast } from "@/components/ui/toast";
 import { useConfirm } from "@/components/ui/confirm";
+import ScoringEmphasisSlider from "@/components/ScoringEmphasisSlider";
 
 export default function EditRolePage() {
     const router = useRouter();
@@ -15,6 +16,7 @@ export default function EditRolePage() {
     const [description, setDescription] = useState("");
     const [skills, setSkills] = useState("");
     const [minYears, setMinYears] = useState(0);
+    const [skillsWeight, setSkillsWeight] = useState(50);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
@@ -26,6 +28,7 @@ export default function EditRolePage() {
                 setDescription(role.description);
                 setSkills(role.requiredSkills.join(", "));
                 setMinYears(role.minYearsExperience);
+                setSkillsWeight(role.skillsWeight ?? 50);
                 setLoading(false);
             });
     }, [params.roleId]);
@@ -46,6 +49,7 @@ export default function EditRolePage() {
                         .map((s) => s.trim())
                         .filter(Boolean),
                     minYearsExperience: minYears,
+                    skillsWeight,
                 }),
             });
             if (!res.ok) throw new Error("Failed to save role");
@@ -132,6 +136,7 @@ export default function EditRolePage() {
                         className="mt-1 w-32 rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground"
                     />
                 </div>
+                <ScoringEmphasisSlider value={skillsWeight} onChange={setSkillsWeight} />
                 <div className="flex items-center gap-3">
                     <button
                         type="submit"

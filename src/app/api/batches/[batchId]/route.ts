@@ -72,6 +72,7 @@ export async function POST(
       required_skills: batch.role.requiredSkills,
       min_years_experience: batch.role.minYearsExperience,
       description: batch.role.description,
+      skills_weight: batch.role.skillsWeight,
     },
     candidates: candidatesWithReadUrls,
     callbackUrl: `${baseUrl}/api/webhooks/candidate-result`,
