@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCandidateDisplayName } from "@/lib/displayName";
 import { requireTeam } from "@/lib/requireTeam";
 import { getCandidateForTeam } from "@/lib/teamScoped";
+import { enforceRateLimit } from "@/lib/rateLimit";
 
 const PARSING_SERVICE_URL = process.env.PARSING_SERVICE_URL!;
 const PARSING_SERVICE_TOKEN = process.env.PARSING_SERVICE_TOKEN!;
@@ -16,6 +17,10 @@ export async function POST(
     const { candidateId } = await params;
     const { candidate, error: candErr } = await getCandidateForTeam(candidateId, teamId);
     if (candErr) return candErr;
+
+    // 40 email drafts per team per hour.
+    const limited = await enforceRateLimit(teamId, "draft-email", 40, 60 * 60 * 1000);
+    if (limited) return limited;
 
     const { emailType, instruction, previousDraft } = await req.json();
 

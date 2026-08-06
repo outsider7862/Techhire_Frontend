@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireTeam } from "@/lib/requireTeam";
 import { getRoleForTeam } from "@/lib/teamScoped";
 import { getCandidateDisplayName } from "@/lib/displayName";
+import { enforceRateLimit } from "@/lib/rateLimit";
 
 const PARSING_SERVICE_URL = process.env.PARSING_SERVICE_URL!;
 const PARSING_SERVICE_TOKEN = process.env.PARSING_SERVICE_TOKEN!;
@@ -28,6 +29,10 @@ export async function POST(
       { status: 400 }
     );
   }
+
+  // 15 leaderboard explanations per team per hour (it re-scores the whole set).
+  const limited = await enforceRateLimit(teamId, "explain-leaderboard", 15, 60 * 60 * 1000);
+  if (limited) return limited;
 
   const res = await fetch(`${PARSING_SERVICE_URL}/explain-leaderboard`, {
     method: "POST",

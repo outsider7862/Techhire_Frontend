@@ -93,6 +93,18 @@ model Team {
   roles     Role[]
 }
 
+// Fixed-window rate-limit counter, one row per (team, action, window). Used
+// to cap how often a team can hit cost-bearing AI endpoints.
+model RateLimit {
+  id          String   @id @default(cuid())
+  teamId      String
+  kind        String
+  windowStart DateTime
+  count       Int      @default(0)
+
+  @@unique([teamId, kind, windowStart])
+}
+
 model Profile {
   id        String   @id @db.Uuid
   name      String
