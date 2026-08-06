@@ -157,7 +157,11 @@ export default async function CandidatePage({
             </div>
 
             <div className="mt-10">
-                <NotesSection candidateId={candidate.id} initialNotes={candidate.notes} />
+                <NotesSection
+                    candidateId={candidate.id}
+                    initialNotes={candidate.notes}
+                    currentUserId={user.id}
+                />
             </div>
         </main>
     );
