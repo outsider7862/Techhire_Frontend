@@ -4,11 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import Avatar from "@/components/Avatar";
+import { useToast } from "@/components/ui/toast";
+import { useConfirm } from "@/components/ui/confirm";
 
 type Profile = { id: string; name: string; email: string; createdAt: string | Date };
 
 export default function ProfileForm({ user }: { user: Profile }) {
     const router = useRouter();
+    const toast = useToast();
+    const confirm = useConfirm();
     const [name, setName] = useState(user.name);
     const [savingName, setSavingName] = useState(false);
 
@@ -30,9 +34,10 @@ export default function ProfileForm({ user }: { user: Profile }) {
                 body: JSON.stringify({ name }),
             });
             if (!res.ok) throw new Error();
+            toast.success("Name updated.");
             router.refresh();
         } catch {
-            alert("Couldn't save your name — please try again.");
+            toast.error("Couldn't save your name — please try again.");
         } finally {
             setSavingName(false);
         }
@@ -72,13 +77,13 @@ export default function ProfileForm({ user }: { user: Profile }) {
     }
 
     async function handleDelete() {
-        if (
-            !confirm(
-                "Delete your account permanently? This can't be undone. Your notes will remain but show no author."
-            )
-        ) {
-            return;
-        }
+        const ok = await confirm({
+            title: "Delete your account?",
+            body: "This can't be undone. Your notes will remain but show no author.",
+            confirmText: "Delete account",
+            destructive: true,
+        });
+        if (!ok) return;
         setDeleting(true);
         await fetch("/api/profile", { method: "DELETE" });
         const supabase = createClient();

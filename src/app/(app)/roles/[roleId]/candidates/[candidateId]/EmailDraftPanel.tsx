@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useToast } from "@/components/ui/toast";
 
 type Draft = { subject: string; body: string };
 type EmailType = "interview_invite" | "rejection" | "status_update" | "offer";
@@ -19,6 +20,7 @@ export default function EmailDraftPanel({
     candidateId: string;
     candidateEmail?: string | null;
 }) {
+    const toast = useToast();
     const [emailType, setEmailType] = useState<EmailType>("interview_invite");
     const [draft, setDraft] = useState<Draft | null>(null);
     const [instruction, setInstruction] = useState("");
@@ -38,11 +40,14 @@ export default function EmailDraftPanel({
                     previousDraft: isRevision ? draft : undefined,
                 }),
             });
-            if (!res.ok) throw new Error("Failed to draft email");
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error ?? "Couldn't draft the email — please try again.");
+            }
             setDraft(await res.json());
             setInstruction("");
-        } catch {
-            alert("Couldn't draft the email — please try again.");
+        } catch (e) {
+            toast.error(e instanceof Error ? e.message : "Couldn't draft the email — please try again.");
         } finally {
             setLoading(false);
         }

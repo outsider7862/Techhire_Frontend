@@ -3,9 +3,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { useToast } from "@/components/ui/toast";
+import { useConfirm } from "@/components/ui/confirm";
 
 export default function EditRolePage() {
     const router = useRouter();
+    const toast = useToast();
+    const confirm = useConfirm();
     const params = useParams<{ roleId: string }>();
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -45,19 +49,25 @@ export default function EditRolePage() {
                 }),
             });
             if (!res.ok) throw new Error("Failed to save role");
+            toast.success("Role updated.");
             router.push(`/roles/${params.roleId}`);
             router.refresh();
         } catch {
-            alert("Couldn't save changes — please try again.");
+            toast.error("Couldn't save changes — please try again.");
             setSubmitting(false);
         }
     }
 
     async function handleDelete() {
-        if (!confirm("Delete this role and all its candidates? This can't be undone.")) {
-            return;
-        }
+        const ok = await confirm({
+            title: "Delete role?",
+            body: "This deletes the role and all its candidates. This can't be undone.",
+            confirmText: "Delete role",
+            destructive: true,
+        });
+        if (!ok) return;
         await fetch(`/api/roles/${params.roleId}`, { method: "DELETE" });
+        toast.success("Role deleted.");
         router.push("/roles");
     }
 

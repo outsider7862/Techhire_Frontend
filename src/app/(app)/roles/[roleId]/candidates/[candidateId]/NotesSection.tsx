@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/toast";
 
 type Note = {
     id: string;
@@ -18,6 +19,7 @@ export default function NotesSection({
     initialNotes: Note[];
 }) {
     const router = useRouter();
+    const toast = useToast();
     const [notes, setNotes] = useState(initialNotes);
     const [draft, setDraft] = useState("");
     const [submitting, setSubmitting] = useState(false);
@@ -39,7 +41,7 @@ export default function NotesSection({
             setDraft("");
             router.refresh();
         } catch {
-            alert("Couldn't add the note — please try again.");
+            toast.error("Couldn't add the note — please try again.");
         } finally {
             setSubmitting(false);
         }

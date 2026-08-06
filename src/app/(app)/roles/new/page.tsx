@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { useToast } from "@/components/ui/toast";
 
 export default function NewRolePage() {
   const router = useRouter();
+  const toast = useToast();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [skills, setSkills] = useState("");
@@ -34,7 +36,7 @@ export default function NewRolePage() {
       const role = await res.json();
       router.push(`/roles/${role.id}`);
     } catch {
-      alert("Couldn't create the role — please try again.");
+      toast.error("Couldn't create the role — please try again.");
       setSubmitting(false);
     }
   }

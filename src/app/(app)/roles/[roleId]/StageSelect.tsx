@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useToast } from "@/components/ui/toast";
 
 const STAGES = [
   "APPLIED",
@@ -20,6 +21,7 @@ export default function StageSelect({
   currentStage: string;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [stage, setStage] = useState(currentStage);
   const [saving, setSaving] = useState(false);
 
@@ -38,7 +40,7 @@ export default function StageSelect({
       router.refresh();
     } catch {
       setStage(previousStage);
-      alert("Couldn't update the stage — please try again.");
+      toast.error("Couldn't update the stage — please try again.");
     } finally {
       setSaving(false);
     }

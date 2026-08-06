@@ -3,6 +3,8 @@
 import { getCandidateDisplayName } from "@/lib/displayName";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/toast";
+import { useConfirm } from "@/components/ui/confirm";
 import {
     DndContext,
     DragEndEvent,
@@ -183,6 +185,8 @@ export default function PipelineBoard({
     initialCandidates: Candidate[];
 }) {
     const router = useRouter();
+    const toast = useToast();
+    const confirm = useConfirm();
     const [candidates, setCandidates] = useState(initialCandidates);
     const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -220,27 +224,29 @@ export default function PipelineBoard({
             router.refresh();
         } catch {
             setCandidates(previous);
-            alert("Couldn't move the candidate — please try again.");
+            toast.error("Couldn't move the candidate — please try again.");
         }
     }
 
     async function handleDelete(candidateId: string) {
-        if (
-            !confirm(
-                "Delete this candidate? Their resume, notes, and scheduled interviews are removed too. This can't be undone."
-            )
-        ) {
-            return;
-        }
+        const ok = await confirm({
+            title: "Delete candidate?",
+            body: "Their resume, notes, and scheduled interviews are removed too. This can't be undone.",
+            confirmText: "Delete",
+            destructive: true,
+        });
+        if (!ok) return;
+
         const previous = candidates;
         setCandidates((prev) => prev.filter((c) => c.id !== candidateId));
         try {
             const res = await fetch(`/api/candidates/${candidateId}`, { method: "DELETE" });
             if (!res.ok) throw new Error();
+            toast.success("Candidate deleted.");
             router.refresh();
         } catch {
             setCandidates(previous);
-            alert("Couldn't delete the candidate — please try again.");
+            toast.error("Couldn't delete the candidate — please try again.");
         }
     }
 

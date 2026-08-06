@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 
 import { getCandidateDisplayName } from "@/lib/displayName";
+import { useToast } from "@/components/ui/toast";
+import { useConfirm } from "@/components/ui/confirm";
 
 type Candidate = { id: string; fileName: string; name: string | null; role: { title: string } };
 
@@ -23,6 +25,8 @@ export default function EventModal({
     state: ModalState;
     onClose: (didChange: boolean) => void;
 }) {
+    const toast = useToast();
+    const confirm = useConfirm();
     // In create mode the form is seeded straight from props. Edit mode starts
     // blank and is filled in by the fetch below. CalendarView keys this
     // component on the event identity, so a different event remounts it and
@@ -85,7 +89,11 @@ export default function EventModal({
         if (res.status === 409) {
             const { conflicts } = await res.json();
             const names = conflicts.map((c: { title: string }) => c.title).join(", ");
-            const proceed = confirm(`This overlaps with: ${names}. Save anyway?`);
+            const proceed = await confirm({
+                title: "Scheduling conflict",
+                body: `This overlaps with: ${names}. Save anyway?`,
+                confirmText: "Save anyway",
+            });
             if (proceed) {
                 await fetch(url, {
                     method,
@@ -99,7 +107,7 @@ export default function EventModal({
         }
 
         if (!res.ok) {
-            alert("Couldn't save the event — please try again.");
+            toast.error("Couldn't save the event — please try again.");
             setSaving(false);
             return;
         }
@@ -109,7 +117,12 @@ export default function EventModal({
 
     async function handleDelete() {
         if (state.mode !== "edit") return;
-        if (!confirm("Delete this event?")) return;
+        const ok = await confirm({
+            title: "Delete event?",
+            confirmText: "Delete",
+            destructive: true,
+        });
+        if (!ok) return;
         await fetch(`/api/events/${state.eventId}`, { method: "DELETE" });
         onClose(true);
     }

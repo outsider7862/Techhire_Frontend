@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/toast";
+import { useConfirm } from "@/components/ui/confirm";
 
 export default function DeleteCandidateButton({
     candidateId,
@@ -11,24 +13,28 @@ export default function DeleteCandidateButton({
     roleId: string;
 }) {
     const router = useRouter();
+    const toast = useToast();
+    const confirm = useConfirm();
     const [deleting, setDeleting] = useState(false);
 
     async function handleDelete() {
-        if (
-            !confirm(
-                "Delete this candidate? Their resume, notes, and scheduled interviews are removed too. This can't be undone."
-            )
-        ) {
-            return;
-        }
+        const ok = await confirm({
+            title: "Delete candidate?",
+            body: "Their resume, notes, and scheduled interviews are removed too. This can't be undone.",
+            confirmText: "Delete",
+            destructive: true,
+        });
+        if (!ok) return;
+
         setDeleting(true);
         try {
             const res = await fetch(`/api/candidates/${candidateId}`, { method: "DELETE" });
             if (!res.ok) throw new Error();
+            toast.success("Candidate deleted.");
             router.push(`/roles/${roleId}`);
             router.refresh();
         } catch {
-            alert("Couldn't delete the candidate — please try again.");
+            toast.error("Couldn't delete the candidate — please try again.");
             setDeleting(false);
         }
     }

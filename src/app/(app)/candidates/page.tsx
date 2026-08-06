@@ -2,6 +2,7 @@
 import { getCandidateDisplayName } from "@/lib/displayName";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/ui/toast";
 
 type Candidate = {
     id: string;
@@ -49,6 +50,7 @@ type Role = { id: string; title: string };
 const STAGES = ["", "APPLIED", "SCREENING", "INTERVIEW", "OFFER", "REJECTED", "HIRED"];
 
 export default function CandidatesSearchPage() {
+    const toast = useToast();
     const [roles, setRoles] = useState<Role[]>([]);
     const [query, setQuery] = useState("");
     const [minYears, setMinYears] = useState("");
@@ -76,11 +78,11 @@ export default function CandidatesSearchPage() {
             if (!res.ok) throw new Error("Search failed");
             setResults(await res.json());
         } catch {
-            alert("Search failed — please try again.");
+            toast.error("Search failed — please try again.");
         } finally {
             setLoading(false);
         }
-    }, [query, minYears, roleId, stage]);
+    }, [query, minYears, roleId, stage, toast]);
 
     useEffect(() => {
         const timeout = setTimeout(runSearch, 300);

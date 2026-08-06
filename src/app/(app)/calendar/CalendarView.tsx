@@ -14,6 +14,8 @@ import type {
 } from "@fullcalendar/core";
 import type { EventResizeDoneArg } from "@fullcalendar/interaction";
 import EventModal from "./EventModal";
+import { useToast } from "@/components/ui/toast";
+import { useConfirm } from "@/components/ui/confirm";
 
 type ModalState =
     | { mode: "create"; start: Date; end: Date; candidateId?: string }
@@ -23,6 +25,8 @@ type ModalState =
 export default function CalendarView() {
     const calendarRef = useRef<FullCalendar | null>(null);
     const searchParams = useSearchParams();
+    const toast = useToast();
+    const confirm = useConfirm();
     const [duration, setDuration] = useState(30);
 
     // Arriving from a candidate's "+ Schedule" link opens the create modal
@@ -79,7 +83,11 @@ export default function CalendarView() {
         if (res.status === 409) {
             const { conflicts } = await res.json();
             const names = conflicts.map((c: { title: string }) => c.title).join(", ");
-            const proceed = confirm(`This overlaps with: ${names}. Move it anyway?`);
+            const proceed = await confirm({
+                title: "Scheduling conflict",
+                body: `This overlaps with: ${names}. Move it anyway?`,
+                confirmText: "Move anyway",
+            });
             if (proceed) {
                 await fetch(`/api/events/${eventId}`, {
                     method: "PATCH",
@@ -97,7 +105,7 @@ export default function CalendarView() {
         }
 
         if (!res.ok) {
-            alert("Couldn't move the event — please try again.");
+            toast.error("Couldn't move the event — please try again.");
             revert();
         }
     }
@@ -117,7 +125,7 @@ export default function CalendarView() {
             body: JSON.stringify({ durationMinutes: duration }),
         });
         if (!res.ok) {
-            alert("No available slot found in the next two weeks.");
+            toast.info("No available slot found in the next two weeks.");
             return;
         }
         const { start, end } = await res.json();

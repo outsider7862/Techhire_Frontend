@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useToast } from "@/components/ui/toast";
 
 export default function ViewResumeButton({ candidateId }: { candidateId: string }) {
     const [loading, setLoading] = useState(false);
+    const toast = useToast();
 
     async function handleClick() {
         setLoading(true);
@@ -13,7 +15,7 @@ export default function ViewResumeButton({ candidateId }: { candidateId: string 
             const { url } = await res.json();
             window.open(url, "_blank", "noopener,noreferrer");
         } catch {
-            alert("Couldn't open the resume — please try again.");
+            toast.error("Couldn't open the resume — please try again.");
         } finally {
             setLoading(false);
         }
