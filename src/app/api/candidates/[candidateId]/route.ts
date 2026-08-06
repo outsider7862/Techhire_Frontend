@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireTeam } from "@/lib/requireTeam";
 import { getCandidateForTeam } from "@/lib/teamScoped";
 import { deleteStoredFile } from "@/lib/storage";
+import { logActivity } from "@/lib/activity";
 
 export async function GET(
   _req: NextRequest,
@@ -34,11 +35,11 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ candidateId: string }> }
 ) {
-  const { teamId, error } = await requireTeam();
+  const { user, teamId, error } = await requireTeam();
   if (error) return error;
 
   const { candidateId } = await params;
-  const { error: candErr } = await getCandidateForTeam(candidateId, teamId);
+  const { candidate: existing, error: candErr } = await getCandidateForTeam(candidateId, teamId);
   if (candErr) return candErr;
 
   const { stage } = await req.json();
@@ -46,6 +47,15 @@ export async function PATCH(
     where: { id: candidateId },
     data: { stage },
   });
+
+  if (stage && stage !== existing.stage) {
+    const actor = await prisma.profile.findUnique({
+      where: { id: user.id },
+      select: { name: true },
+    });
+    const pretty = stage.charAt(0) + stage.slice(1).toLowerCase();
+    await logActivity(teamId, candidateId, actor?.name ?? "Someone", `moved to ${pretty}`);
+  }
 
   return NextResponse.json(candidate);
 }

@@ -67,9 +67,10 @@ model Candidate {
   scoreReasoning  String?
   scoredAt        DateTime? // set when status transitions to SCORED — used by analytics
 
-  stage  PipelineStage @default(APPLIED)
-  notes  Note[]
-  events Event[]
+  stage      PipelineStage @default(APPLIED)
+  notes      Note[]
+  events     Event[]
+  activities Activity[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -91,6 +92,20 @@ model Team {
   createdAt DateTime  @default(now())
   members   Profile[]
   roles     Role[]
+}
+
+// Lightweight per-candidate activity feed (e.g. stage changes), shown on the
+// candidate detail page. Cascades away when the candidate is deleted.
+model Activity {
+  id          String    @id @default(cuid())
+  teamId      String
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  actorName   String
+  message     String
+  createdAt   DateTime  @default(now())
+
+  @@index([candidateId])
 }
 
 // Fixed-window rate-limit counter, one row per (team, action, window). Used

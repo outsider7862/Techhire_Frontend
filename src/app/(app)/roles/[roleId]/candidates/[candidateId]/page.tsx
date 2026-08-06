@@ -34,6 +34,7 @@ export default async function CandidatePage({
                 include: { author: { select: { name: true } } },
             },
             events: { orderBy: { startTime: "asc" } },
+            activities: { orderBy: { createdAt: "desc" }, take: 20 },
         },
     });
 
@@ -163,6 +164,24 @@ export default async function CandidatePage({
                     currentUserId={user.id}
                 />
             </div>
+
+            {candidate.activities.length > 0 && (
+                <div className="mt-10">
+                    <h2 className="text-sm font-medium text-muted-foreground">Activity</h2>
+                    <ul className="mt-3 space-y-2 border-l border-border pl-4">
+                        {candidate.activities.map((a) => (
+                            <li key={a.id} className="relative text-sm text-foreground">
+                                <span className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-accent" />
+                                <span className="font-medium">{a.actorName}</span>{" "}
+                                <span className="text-muted-foreground">{a.message}</span>
+                                <span className="ml-2 text-xs text-muted-foreground">
+                                    {new Date(a.createdAt).toLocaleString()}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </main>
     );
 }
