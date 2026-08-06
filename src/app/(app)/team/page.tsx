@@ -3,6 +3,8 @@ import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/lib/prisma";
 import TeamOnboarding from "./TeamOnboarding";
 import Avatar from "@/components/Avatar";
+import LeaveTeamButton from "./LeaveTeamButton";
+import RemoveMemberButton from "./RemoveMemberButton";
 
 export default async function TeamPage() {
     const supabase = await createClient();
@@ -28,17 +30,25 @@ export default async function TeamPage() {
         );
     }
 
+    const isOwner = profile.team.ownerId === user.id;
+    const soleOwner = isOwner && profile.team.members.length === 1;
+
     return (
         <main className="mx-auto max-w-2xl px-6 py-16">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                {profile.team.name}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-                Share this code so teammates can join:{" "}
-                <span className="rounded bg-muted px-2 py-0.5 font-mono text-foreground">
-                    {profile.team.joinCode}
-                </span>
-            </p>
+            <div className="flex items-start justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                        {profile.team.name}
+                    </h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        Share this code so teammates can join:{" "}
+                        <span className="rounded bg-muted px-2 py-0.5 font-mono text-foreground">
+                            {profile.team.joinCode}
+                        </span>
+                    </p>
+                </div>
+                <LeaveTeamButton teamName={profile.team.name} soleOwner={soleOwner} />
+            </div>
 
             <div className="mt-8 divide-y divide-border rounded-lg border border-border bg-card">
                 {profile.team.members.map((m, i) => (
@@ -51,8 +61,13 @@ export default async function TeamPage() {
                         <div>
                             <p className="text-sm font-medium text-foreground">
                                 {m.name}
+                                {m.id === user.id && (
+                                    <span className="ml-2 text-xs text-muted-foreground">You</span>
+                                )}
                                 {m.id === profile.team!.ownerId && (
-                                    <span className="ml-2 text-xs text-muted-foreground">Owner</span>
+                                    <span className="ml-2 rounded bg-accent/10 px-1.5 py-0.5 text-xs font-medium text-accent">
+                                        Owner
+                                    </span>
                                 )}
                             </p>
                             <p className="text-xs text-muted-foreground">{m.email}</p>
@@ -60,6 +75,9 @@ export default async function TeamPage() {
                         <span className="ml-auto text-xs text-muted-foreground">
                             Joined {new Date(m.createdAt).toLocaleDateString()}
                         </span>
+                        {isOwner && m.id !== user.id && (
+                            <RemoveMemberButton memberId={m.id} memberName={m.name} />
+                        )}
                     </div>
                 ))}
             </div>
